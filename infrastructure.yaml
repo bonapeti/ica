@@ -1,0 +1,5 @@
+- name: "My infrastructure"
+  type: azure
+  tenant: "900a843e-af52-4bc8-9009-4676366d9d97"
+  subscription:
+    id: "5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
