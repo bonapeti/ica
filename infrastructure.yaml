@@ -1,5 +1,6 @@
-- name: "My infrastructure"
-  type: azure
-  tenant: "900a843e-af52-4bc8-9009-4676366d9d97"
-  subscription:
-    id: "5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
+- cloud: azure
+  name: "MSCI v3"
+  tenantId: "7a9376d4-7c43-480f-82ba-a090647f651d"
+  subscruptions:
+  - name: "Global Solutions non production"
+    id: "e778a03a-847b-4d1b-9548-8f25a94d0e9f"

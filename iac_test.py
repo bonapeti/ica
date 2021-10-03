@@ -1,4 +1,4 @@
-from ica import main, default_filename
+from iac import main, default_filename
 
 
 def test_pull_without_file(cli_runner):
