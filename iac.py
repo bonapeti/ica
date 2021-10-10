@@ -42,7 +42,9 @@ def status(file):
 
             with ResourceManagementClient(credentials, subscription.id) as resource_client:
                 resource_list = list(resource_client.resources.list())
-                print(f"Remotely managed resources: {len(resource_list)}") 
+                print(f"Remotely managed resources: {len(resource_list)}")
+                for resource in resource_list:
+                    print(f"{resource.type} {resource.name}")
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
     except KeyError as ke:
