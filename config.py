@@ -1,4 +1,4 @@
-from azure.mgmt.resource import subscriptions
+from azure.mgmt.resource import resources, subscriptions
 import yaml
 
 AZURE="azure"
@@ -28,6 +28,9 @@ class Config:
         assert type(yaml_config) == list
 
         azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
+        if len(azure_providers) == 0:
+            raise ValueError("Missing Azure tenant")
+
         if len(azure_providers) > 1:
             raise ValueError("More than one Azure tenant defined, only one expected!")
         
@@ -37,7 +40,13 @@ class Config:
         tenant_id = expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
         tenant_name = expect_string(azure_tenant,YAML_TENANT_NAME, "Missing tenant name!")
 
-        azure_config = AzureConfig(tenant_id, tenant_name)
+        assert azure_tenant["subscriptions"], "Missing 'subscriptions' under azure cloud configuration"
+        assert type(azure_tenant["subscriptions"]) == list
+
+        subscriptions_configs = list(map(lambda subscription: AzureSubscription(subscription["id"],subscription["name"]), azure_tenant["subscriptions"]))
+        assert type(subscriptions_configs) == list
+
+        azure_config = AzureConfig(tenant_id, tenant_name, subscriptions_configs)
         return Config(azure_config)
 
     
@@ -47,12 +56,23 @@ class AzureConfig:
 
     id = None
     name = None
-    subscriptions = None
+    subscriptions = []
+    
 
-    def __init__(self, id, name):
+    def __init__(self, id, name, subscriptions):
         self.id = id
         self.name = name
+        self.subscriptions = subscriptions
 
     def __repr__(self):
         return f"Azure(tenantId='{self.id}')"
     
+class AzureSubscription:
+
+    id = None
+    name = None
+    resources = []
+
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name

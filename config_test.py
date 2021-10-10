@@ -1,3 +1,4 @@
+from azure.mgmt.resource import subscriptions
 from config import Config
 
 TENANT_ID="7a9376d4-7c43-480f-82ba-a090647f651d"
@@ -9,7 +10,7 @@ def test_load_azure_tenant(cli_runner):
                 - cloud: azure
                   name: "MSCI v3"
                   tenantId: 7a9376d4-7c43-480f-82ba-a090647f651d
-                  subscruptions:
+                  subscriptions:
                   - name: "Global Solutions non production"
                     id: "e778a03a-847b-4d1b-9548-8f25a94d0e9f"
                 """)
@@ -17,5 +18,10 @@ def test_load_azure_tenant(cli_runner):
     
     assert tenant.id == TENANT_ID
     assert tenant.name == TENANT_NAME
+    assert len(tenant.subscriptions) == 1
+    subscription = tenant.subscriptions[0]
+    assert subscription.id == "e778a03a-847b-4d1b-9548-8f25a94d0e9f"
+    assert subscription.name == "Global Solutions non production"
+
 
 

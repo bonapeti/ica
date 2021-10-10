@@ -26,7 +26,7 @@ def status(file):
         config = Config.load(stream)
 
         if config.azure.subscriptions is None:
-            raise click.ClickException(f"Non subscriptions configured for Azure tenant {config.azure.id}!")
+            raise click.ClickException(f"No subscription configured for Azure tenant {config.azure.id}!")
 
         credentials = AzureCliCredential()
         subscription_client = SubscriptionClient(credentials)
@@ -35,15 +35,18 @@ def status(file):
         if config.azure.id not in map(lambda tenant: tenant.tenant_id, tenants):
             raise click.ClickException(f"{config.azure.id} not in your tenant list {tenants}!")
 
-        for config in config.azure.subscriptions:
-            local_resources = config.get("resources",[])
+        for subscription in config.azure.subscriptions:
+            print(f"Subscription: {subscription.name}")
+            local_resources = subscription.resources
             print(f"Locally managed resources: {len(local_resources)}")
 
-            with ResourceManagementClient(credentials, config["subscription"]["id"]) as resource_client:
+            with ResourceManagementClient(credentials, subscription.id) as resource_client:
                 resource_list = list(resource_client.resources.list())
                 print(f"Remotely managed resources: {len(resource_list)}") 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
+    except KeyError as ke:
+        click.echo(str(ke))
     
 
 if __name__ == '__main__':
