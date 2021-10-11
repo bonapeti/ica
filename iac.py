@@ -36,15 +36,14 @@ def status(file):
             raise click.ClickException(f"{config.azure.id} not in your tenant list {tenants}!")
 
         for subscription in config.azure.subscriptions:
-            print(f"Subscription: {subscription.name}")
             local_resources = subscription.resources
-            print(f"Locally managed resources: {len(local_resources)}")
 
             with ResourceManagementClient(credentials, subscription.id) as resource_client:
-                resource_list = list(resource_client.resources.list())
-                print(f"Remotely managed resources: {len(resource_list)}")
-                for resource in resource_list:
-                    print(f"{resource.type} {resource.name}")
+                resource_list = list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
+                # for resource in resource_list:
+                #     print(f"{resource.type} {resource.name} {resource.created_time} {resource.changed_time} {resource.provisioning_state}")
+                print(f"Subscription '{subscription.name}': local resources: {len(local_resources)}, remote resources: {len(resource_list)}")
+    
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
     except KeyError as ke:
