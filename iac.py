@@ -32,7 +32,7 @@ def status(file):
         subscription_client = SubscriptionClient(credentials)
         tenants = list(subscription_client.tenants.list())
 
-        if config.azure.id not in map(lambda tenant: tenant.tenant_id, tenants):
+        if config.azure.id not in list(map(lambda tenant: tenant.tenant_id, tenants)):
             raise click.ClickException(f"{config.azure.id} not in your tenant list {tenants}!")
 
         for subscription in config.azure.subscriptions:
