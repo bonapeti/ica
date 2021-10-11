@@ -2,6 +2,6 @@
   name: "MSCI v3"
   tenantId: "7a9376d4-7c43-480f-82ba-a090647f651d"
   subscriptions:
-  - id: "e778a03a-847b-4d1b-9548-8f25a94d0e9f"
-    name: "Global Solutions non production"
+  - id: "59134732-c952-4ef9-ab63-94a75300c7dc"
+    name: "Global Solutions sandbox"
     
