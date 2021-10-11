@@ -42,7 +42,7 @@ def status(file):
                 resource_list = list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
                 # for resource in resource_list:
                 #     print(f"{resource.type} {resource.name} {resource.created_time} {resource.changed_time} {resource.provisioning_state}")
-                print(f"Subscription '{subscription.name}': local resources: {len(local_resources)}, remote resources: {len(resource_list)}")
+                print(f"Subscription '{subscription}': local resources: {len(local_resources)}, remote resources: {len(resource_list)}")
     
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")

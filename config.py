@@ -76,3 +76,9 @@ class AzureSubscription:
     def __init__(self, id, name):
         self.id = id
         self.name = name
+
+    def __repr__(self):
+        return id
+
+    def __str__(self):
+        return self.name if self.name else self.id
