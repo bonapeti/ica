@@ -1,5 +1,6 @@
 from azure.mgmt.resource import resources, subscriptions
-import yaml
+from ruamel.yaml import YAML
+import sys
 
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
@@ -14,9 +15,14 @@ def expect_string(dict_var, name, error_message):
 
 class Config:
 
+    yaml = None
+    yaml_config = None
     azure = None
+    
 
-    def __init__(self, azure):
+    def __init__(self, yaml, yaml_config, azure):
+        self.yaml = yaml
+        self.yaml_config = yaml_config
         self.azure = azure
 
     def __repr__(self):
@@ -24,9 +30,10 @@ class Config:
 
     @staticmethod
     def load(source):
-        yaml_config = yaml.safe_load(source)
-        assert type(yaml_config) == list
-
+        yaml = YAML()
+        #yaml.preserve_quotes = True
+        yaml_config = yaml.load(source)
+        
         azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
         if len(azure_providers) == 0:
             raise ValueError("Missing Azure tenant")
@@ -35,21 +42,22 @@ class Config:
             raise ValueError("More than one Azure tenant defined, only one expected!")
         
         azure_tenant = azure_providers[0]
-        assert type(azure_tenant) == dict
-
-        tenant_id = expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
-        tenant_name = expect_string(azure_tenant,YAML_TENANT_NAME, "Missing tenant name!")
+        
+        expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
+        expect_string(azure_tenant,YAML_TENANT_NAME, "Missing tenant name!")
 
         assert azure_tenant["subscriptions"], "Missing 'subscriptions' under azure cloud configuration"
-        assert type(azure_tenant["subscriptions"]) == list
+        
+        azure_config = AzureConfig(azure_tenant)
+        return Config(yaml, yaml_config, azure_config)
 
-        subscriptions_configs = list(map(lambda subscription: AzureSubscription(subscription["id"],subscription["name"]), azure_tenant["subscriptions"]))
-        assert type(subscriptions_configs) == list
+    def save(self, newfile_path):
+        with open(newfile_path, 'w') as file:
+            self.yaml.dump(self.yaml_config, file)
 
-        azure_config = AzureConfig(tenant_id, tenant_name, subscriptions_configs)
-        return Config(azure_config)
-
-    
+    def dump(self):
+        self.yaml.dump(self.yaml_config, sys.stdout)
+        
 
 
 class AzureConfig:
@@ -57,12 +65,13 @@ class AzureConfig:
     id = None
     name = None
     subscriptions = []
-    
+    yaml_config = None
 
-    def __init__(self, id, name, subscriptions):
-        self.id = id
-        self.name = name
-        self.subscriptions = subscriptions
+    def __init__(self, azure_yaml):
+        self.id = azure_yaml[YAML_TENANT_ID]
+        self.name = azure_yaml[YAML_TENANT_NAME]
+        self.yaml_config = azure_yaml
+        self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml["subscriptions"]))
 
     def __repr__(self):
         return f"Azure(tenantId='{self.id}')"
@@ -71,11 +80,25 @@ class AzureSubscription:
 
     id = None
     name = None
-    resources = []
+    yaml_config = None
 
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
+    def __init__(self, yaml_subscription):
+        self.id = yaml_subscription["id"]
+        self.name = yaml_subscription["name"]
+        self.yaml_config = yaml_subscription
+        self.yaml_config["resources"] = []
+
+    def get_resources(self):
+        if self.yaml_config["resources"] is None:
+            self.yaml_config["resources"] = []
+        return self.yaml_config["resources"]
+
+    def add_resource(self, new_resource):
+        self.get_resources().append(new_resource)
+
+    def local_resource_count(self):
+        return len(self.yaml_config.get("resources",[]))
+
 
     def __repr__(self):
         return id
