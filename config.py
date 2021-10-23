@@ -1,6 +1,6 @@
 from azure.mgmt.resource import resources, subscriptions
 from ruamel.yaml import YAML
-import sys
+
 
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
@@ -53,9 +53,7 @@ class Config:
     def save(self, ostream):
         self.yaml.dump(self.yaml_config, ostream)
 
-    def dump(self):
-        self.yaml.dump(self.yaml_config, sys.stdout)
-        
+   
 
 
 class AzureConfig:
