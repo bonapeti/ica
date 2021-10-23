@@ -31,7 +31,7 @@ def test_load_azure_tenant(cli_runner):
     assert subscription.id == SUBSCRIPTION_ID
     assert subscription.name == SUBSCRIPTION_NAME
 
-def test_yaml_dump(cli_runner):
+def test_save_azure_resources(cli_runner):
     config = Config.load(TEST_YAML)
     config.azure.subscriptions[0].add_resource({"name": "boo", "type": "baa" })
     with io.StringIO() as test_output:
