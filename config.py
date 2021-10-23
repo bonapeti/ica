@@ -84,7 +84,6 @@ class AzureSubscription:
         self.id = yaml_subscription["id"]
         self.name = yaml_subscription["name"]
         self.yaml_config = yaml_subscription
-        self.yaml_config["resources"] = []
 
     def get_resources(self):
         if self.yaml_config["resources"] is None:
