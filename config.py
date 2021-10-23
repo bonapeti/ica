@@ -85,13 +85,10 @@ class AzureSubscription:
         self.name = yaml_subscription["name"]
         self.yaml_config = yaml_subscription
 
-    def get_resources(self):
-        if self.yaml_config["resources"] is None:
-            self.yaml_config["resources"] = []
-        return self.yaml_config["resources"]
-
     def add_resource(self, new_resource):
-        self.get_resources().append(new_resource)
+        if not "resources" in self.yaml_config:
+            self.yaml_config["resources"] = []
+        self.yaml_config["resources"].append(new_resource)
 
     def local_resource_count(self):
         return len(self.yaml_config.get("resources",[]))
