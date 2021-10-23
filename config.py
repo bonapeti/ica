@@ -31,7 +31,6 @@ class Config:
     @staticmethod
     def load(source):
         yaml = YAML()
-        #yaml.preserve_quotes = True
         yaml_config = yaml.load(source)
         
         azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
@@ -51,9 +50,8 @@ class Config:
         azure_config = AzureConfig(azure_tenant)
         return Config(yaml, yaml_config, azure_config)
 
-    def save(self, newfile_path):
-        with open(newfile_path, 'w') as file:
-            self.yaml.dump(self.yaml_config, file)
+    def save(self, ostream):
+        self.yaml.dump(self.yaml_config, ostream)
 
     def dump(self):
         self.yaml.dump(self.yaml_config, sys.stdout)

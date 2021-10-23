@@ -73,7 +73,7 @@ def pull(file):
                 for resource in resource_list:
                     subscription.add_resource({"name": resource.name, "type": resource.type })
     
-        config.save("newfile.yanl")
+        config.save(open(file,"w"))
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
