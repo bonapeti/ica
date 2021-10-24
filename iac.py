@@ -88,7 +88,7 @@ def pull(file):
     
 
 @main.command()
-@click.option("-t","--type", required=True, help="One of supported cloud provider: 'azure'")
+@click.option("-t","--type", required=True, type=click.Choice(['azure']), help="One of supported cloud provider: 'azure'")
 @click.option("-s","--subscription_id", required=True, help="Subscription ID")
 def describe(type, subscription_id):
     f"""Pulls latest remote resource list prints as YAML configutation to stdout"""
