@@ -42,7 +42,11 @@ def status(file):
 
             with ResourceManagementClient(credentials, subscription.id) as resource_client:
                 resource_list = list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
-                print(f"Subscription '{subscription}': local resources: {subscription.local_resource_count()}, remote resources: {len(resource_list)}")
+                click.echo(f"Azure subscription '{subscription}'")
+                if len(resource_list) == subscription.local_resource_count():
+                    click.echo("\tNo changes")
+                else:
+                    click.echo("\tThere are differences")
     
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")

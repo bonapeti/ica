@@ -15,10 +15,10 @@ def test_status_with_file(cli_runner):
     with cli_runner.isolated_filesystem():
       prepare_test_config_file()
       result = cli_runner.invoke(main, ["status"])
-      assert result.output == f"Subscription '{SUBSCRIPTION_NAME}': local resources: 0, remote resources: 337\n"
+      assert result.output == f"Azure subscription '{SUBSCRIPTION_NAME}'\n\tThere are differences\n"
       assert result.exit_code == 0
 
-def test_show(cli_runner):
+def test_describe(cli_runner):
 
     result = cli_runner.invoke(main, ["describe","-s","59134732-c952-4ef9-ab63-94a75300c7dc"])
     with open("./test_gs_sandbox.yaml","r") as expected_file:

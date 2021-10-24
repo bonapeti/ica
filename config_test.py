@@ -6,8 +6,8 @@ import io
 
 TENANT_ID="7a9376d4-7c43-480f-82ba-a090647f651d"
 TENANT_NAME="MSCI v3"
-SUBSCRIPTION_ID="e778a03a-847b-4d1b-9548-8f25a94d0e9f"
-SUBSCRIPTION_NAME="Global Solutions non production"
+SUBSCRIPTION_ID="59134732-c952-4ef9-ab63-94a75300c7dc"
+SUBSCRIPTION_NAME="GlobalSolutions_Sandbox"
 
 TEST_YAML=f"""\
 - cloud: azure
