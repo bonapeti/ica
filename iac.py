@@ -16,7 +16,7 @@ CONFIG_FILE_HELP="YAML file describing infrastructure"
 @click.group()
 @click.version_option(version="0.0.2")
 def main():
-    """Manages cloud infrastructure with code"""
+    """Manages cloud infrastructure as code"""
     pass
 
 @main.command()
