@@ -22,7 +22,7 @@ def main():
 @main.command()
 @click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
 def status(file):
-    f"""Pulls latest changes and updates {file}"""
+    """Shows differences between local and cloud infrastructure"""
 
     try:
         stream = open(file,"r")
@@ -56,7 +56,7 @@ def status(file):
 @main.command()
 @click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
 def pull(file):
-    f"""Pulls latest remote resource list and updates local config file"""
+    """Pulls latest cloud info and updates local config file"""
 
     try:
         stream = open(file,"r")
@@ -91,7 +91,7 @@ def pull(file):
 @click.option("-t","--type", required=True, type=click.Choice(['azure']), help="One of supported cloud provider: 'azure'")
 @click.option("-s","--subscription_id", required=True, help="Subscription ID")
 def describe(type, subscription_id):
-    f"""Pulls latest remote resource list prints as YAML configutation to stdout"""
+    """Prints cloud infrastructure to stdout as YAML"""
 
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
