@@ -3,6 +3,7 @@ from azure.mgmt.resource import subscriptions
 import click
 from config import Config
 from azure.identity import AzureCliCredential
+from azure.identity._exceptions import CredentialUnavailableError
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
@@ -52,6 +53,8 @@ def status(file):
         click.echo(f"Cannot find {file}")
     except KeyError as ke:
         click.echo(str(ke))
+    except CredentialUnavailableError as login_error:
+        click.echo(str(login_error))
     
 @main.command()
 @click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
@@ -85,7 +88,8 @@ def pull(file):
         click.echo(f"Cannot find {file}")
     except KeyError as ke:
         click.echo(str(ke))
-    
+    except CredentialUnavailableError as login_error:
+        click.echo(str(login_error))    
 
 @main.command()
 @click.option("-t","--type", required=True, type=click.Choice(['azure']), help="One of supported cloud provider: 'azure'")
@@ -122,7 +126,8 @@ def describe(type, subscription_id):
 
     except KeyError as ke:
         click.echo(str(ke))
-    
+    except CredentialUnavailableError as login_error:
+        click.echo(str(login_error))   
 
 
 if __name__ == '__main__':
