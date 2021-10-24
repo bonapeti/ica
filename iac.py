@@ -93,6 +93,7 @@ def pull(file):
 def describe(type, subscription_id):
     f"""Pulls latest remote resource list prints as YAML configutation to stdout"""
 
+    assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
         credentials = AzureCliCredential()
         subscription_client = SubscriptionClient(credentials)
