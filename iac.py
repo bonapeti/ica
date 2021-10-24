@@ -11,7 +11,7 @@ import difflib
 
 
 default_filename = "infrastructure.yaml"
-
+CONFIG_FILE_HELP="YAML file describing infrastructure"
 
 @click.group()
 @click.version_option(version="0.0.2")
@@ -20,7 +20,7 @@ def main():
     pass
 
 @main.command()
-@click.option("-f","--file", default=default_filename, show_default=True)
+@click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
 def status(file):
     f"""Pulls latest changes and updates {file}"""
 
@@ -54,7 +54,7 @@ def status(file):
         click.echo(str(ke))
     
 @main.command()
-@click.option("-f","--file", default=default_filename, show_default=True)
+@click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
 def pull(file):
     f"""Pulls latest remote resource list and updates local config file"""
 
@@ -88,8 +88,8 @@ def pull(file):
     
 
 @main.command()
-@click.option("-t","--type", default="azure", show_default=True)
-@click.option("-s","--subscription_id", required=True)
+@click.option("-t","--type", required=True, help="One of supported cloud provider: 'azure'")
+@click.option("-s","--subscription_id", required=True, help="Subscription ID")
 def describe(type, subscription_id):
     f"""Pulls latest remote resource list prints as YAML configutation to stdout"""
 
