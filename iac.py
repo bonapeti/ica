@@ -7,9 +7,7 @@ from azure.identity._exceptions import CredentialUnavailableError
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
-import difflib
-
-
+import azure_api
 
 default_filename = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
@@ -29,25 +27,14 @@ def status(file):
         stream = open(file,"r")
         config = Config.load(stream)
 
-        if config.azure.subscriptions is None:
-            raise click.ClickException(f"No subscription configured for Azure tenant {config.azure.id}!")
+        subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions )
 
-        credentials = AzureCliCredential()
-        subscription_client = SubscriptionClient(credentials)
-        tenants = list(subscription_client.tenants.list())
-
-        if config.azure.id not in list(map(lambda tenant: tenant.tenant_id, tenants)):
-            raise click.ClickException(f"{config.azure.id} not in your tenant list {tenants}!")
-
-        for subscription in config.azure.subscriptions:
-
-            with ResourceManagementClient(credentials, subscription.id) as resource_client:
-                resource_list = list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
-                click.echo(f"Azure subscription '{subscription}'")
-                if len(resource_list) == subscription.local_resource_count():
-                    click.echo("\tNo changes")
-                else:
-                    click.echo("\tThere are differences")
+        for subscription, resource_list in subscription_resources.items():
+            click.echo(f"Azure subscription '{subscription.name}'")
+            if len(resource_list) == subscription.local_resource_count():
+                click.echo("\tNo changes")
+            else:
+                click.echo("\tThere are differences")
     
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -65,22 +52,11 @@ def pull(file):
         stream = open(file,"r")
         config = Config.load(stream)
 
-        if config.azure.subscriptions is None:
-            raise click.ClickException(f"No subscription configured for Azure tenant {config.azure.id}!")
+        subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
 
-        credentials = AzureCliCredential()
-        subscription_client = SubscriptionClient(credentials)
-        tenants = list(subscription_client.tenants.list())
-
-        if config.azure.id not in list(map(lambda tenant: tenant.tenant_id, tenants)):
-            raise click.ClickException(f"{config.azure.id} not in your tenant list {tenants}!")
-
-        for subscription in config.azure.subscriptions:
-
-            with ResourceManagementClient(credentials, subscription.id) as resource_client:
-                resource_list = list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
-                for resource in resource_list:
-                    subscription.add_resource({"name": resource.name, "type": resource.type })
+        for subscription, resource_list in subscription_resources.items():
+            for resource in resource_list:
+                subscription.add_resource({"name": resource.name, "type": resource.type })
     
         config.save(open(file,"w"))
 
