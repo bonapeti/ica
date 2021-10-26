@@ -1,10 +1,7 @@
-from azure.core import credentials
-from azure.mgmt.resource import subscriptions
 import click
 from config import Config
 from azure.identity import AzureCliCredential
 from azure.identity._exceptions import CredentialUnavailableError
-from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
 import azure_api

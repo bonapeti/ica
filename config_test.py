@@ -1,7 +1,4 @@
-from azure.mgmt.resource import subscriptions
 from config import Config
-from ruamel.yaml import YAML
-import sys
 import io
 
 TENANT_ID="7a9376d4-7c43-480f-82ba-a090647f651d"

@@ -1,8 +1,8 @@
 from iac import main, default_filename
+from config import AZURE
 from config_test import TEST_YAML, SUBSCRIPTION_ID, SUBSCRIPTION_NAME
 
 TEST_SUBSCRIPTION_ID="59134732-c952-4ef9-ab63-94a75300c7dc"
-AZURE = "azure"
 
 def prepare_test_config_file():
     with open(default_filename, 'w') as f:
