@@ -1,5 +1,6 @@
 from config import Config
 import io
+import pytest
 
 TENANT_ID="7a9376d4-7c43-480f-82ba-a090647f651d"
 SUBSCRIPTION_ID="59134732-c952-4ef9-ab63-94a75300c7dc"
@@ -12,6 +13,12 @@ TEST_YAML=f"""\
   - id: {SUBSCRIPTION_ID}
     name: {SUBSCRIPTION_NAME}
 """
+
+def test_not_supported_provider(cli_runner):
+    with pytest.raises(ValueError):
+        Config.load(f"""\
+- cloud: unknown_cloud
+""")
 
 def test_load_azure_tenant(cli_runner):
     config = Config.load(TEST_YAML)

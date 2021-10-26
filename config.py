@@ -5,6 +5,8 @@ from ruamel.yaml import YAML
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
 
+SUPPORTED_PROVIDERS=[AZURE]
+
 def expect_string(dict_var, name, error_message):
     value = dict_var.get(name)
     if value is None:
@@ -43,6 +45,10 @@ class Config:
         yaml = YAML()
         yaml_config = yaml.load(source)
         
+        not_supported_providers = {provider.get("cloud","") for provider in yaml_config if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
+        for not_supported in not_supported_providers:
+            print(f"Cloud provider '{not_supported}' is not supported")
+
         azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
         if len(azure_providers) == 0:
             raise ValueError("Missing Azure tenant")
