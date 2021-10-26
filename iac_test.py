@@ -1,6 +1,9 @@
 from iac import main, default_filename
 from config_test import TEST_YAML, SUBSCRIPTION_ID, SUBSCRIPTION_NAME
 
+TEST_SUBSCRIPTION_ID="59134732-c952-4ef9-ab63-94a75300c7dc"
+AZURE = "azure"
+
 def prepare_test_config_file():
     with open(default_filename, 'w') as f:
           f.write(TEST_YAML)
@@ -19,8 +22,8 @@ def test_status_with_file(cli_runner):
       assert result.exit_code == 0
 
 def test_describe(cli_runner):
-
-    result = cli_runner.invoke(main, ["describe","-t","azure","-s","59134732-c952-4ef9-ab63-94a75300c7dc"])
+    
+    result = cli_runner.invoke(main, ["describe","-t",AZURE,"-s",TEST_SUBSCRIPTION_ID])
     with open("./test_gs_sandbox.yaml","r") as expected_file:
       assert result.output == expected_file.read()
     assert result.exit_code == 0

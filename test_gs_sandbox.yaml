@@ -1,5 +1,4 @@
 - cloud: azure
-  name: MSCI Office 365
   tenantId: 7a9376d4-7c43-480f-82ba-a090647f651d
   subscriptions:
   - id: 59134732-c952-4ef9-ab63-94a75300c7dc

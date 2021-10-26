@@ -4,7 +4,6 @@ from ruamel.yaml import YAML
 
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
-YAML_TENANT_NAME="name"
 
 def expect_string(dict_var, name, error_message):
     value = dict_var.get(name)
@@ -43,7 +42,6 @@ class Config:
         azure_tenant = azure_providers[0]
         
         expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
-        expect_string(azure_tenant,YAML_TENANT_NAME, "Missing tenant name!")
 
         assert azure_tenant["subscriptions"], "Missing 'subscriptions' under azure cloud configuration"
         
@@ -59,13 +57,11 @@ class Config:
 class AzureConfig:
 
     id = None
-    name = None
     subscriptions = []
     yaml_config = None
 
     def __init__(self, azure_yaml):
         self.id = azure_yaml[YAML_TENANT_ID]
-        self.name = azure_yaml[YAML_TENANT_NAME]
         self.yaml_config = azure_yaml
         self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml["subscriptions"]))
 
