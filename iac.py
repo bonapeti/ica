@@ -93,8 +93,9 @@ def describe(type, subscription_id):
         config = Config.load(output_yaml)
         subscription = config.azure.subscriptions[0]
 
-        with ResourceManagementClient(credentials, subscription_id) as resource_client:
-            resource_list = list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
+        subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
+
+        for subscription, resource_list in subscription_resources.items():
             for resource in resource_list:
                 subscription.add_resource({"name": resource.name, "type": resource.type })
 
