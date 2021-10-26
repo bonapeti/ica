@@ -28,6 +28,17 @@ class Config:
         return f"Config('{self.azure}')"
 
     @staticmethod
+    def new_azure_config(tenant_id, subscription_id, subscription_name):
+        output_yaml=f"""\
+- cloud: azure
+  tenantId: {tenant_id}
+  subscriptions:
+  - id: {subscription_id}
+    name: {subscription_name}
+"""
+        return Config.load(output_yaml)
+
+    @staticmethod
     def load(source):
         yaml = YAML()
         yaml_config = yaml.load(source)

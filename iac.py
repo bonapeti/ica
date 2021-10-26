@@ -75,15 +75,8 @@ def describe(type, subscription_id):
         credentials = AzureCliCredential()
         subscription_client = SubscriptionClient(credentials)
         az_subscription = subscription_client.subscriptions.get(subscription_id)
-        
-        output_yaml=f"""\
-- cloud: azure
-  tenantId: {az_subscription.tenant_id}
-  subscriptions:
-  - id: {subscription_id}
-    name: {az_subscription.display_name}
-"""
-        config = Config.load(output_yaml)
+
+        config = Config.new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
 
         subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
 
