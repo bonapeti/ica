@@ -21,18 +21,16 @@ def status(file):
     """Shows differences between local and cloud infrastructure"""
 
     try:
-        stream = open(file,"r")
-        config = load_yaml(stream)
+        with open(file,"r") as stream:
+            config = load_yaml(stream)
 
-        with AzureCliCredential() as credential:
-            azure_api.compare_tenant_with_remote(credential, config.azure, click) 
-        
+            with AzureCliCredential() as credential:
+                azure_api.compare_tenant_with_remote(credential, config.azure, click) 
+            
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
-    except KeyError as ke:
-        click.echo(str(ke))
-    except CredentialUnavailableError as login_error:
-        click.echo(str(login_error))
+    except Exception as e:
+        click.echo(str(e))
     
 @main.command()
 @click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
@@ -40,20 +38,18 @@ def pull(file):
     """Pulls latest cloud info and updates local config file"""
 
     try:
-        stream = open(file,"r")
-        config = load_yaml(stream)
+        with open(file,"r") as stream:
+            config = load_yaml(stream)
 
-        with AzureCliCredential() as credential:
-            azure_api.update_tenant_from_remote(credential, config.azure) 
-    
-        save_yaml(config.yaml_config, open(file,"w"))
+            with AzureCliCredential() as credential:
+                azure_api.update_tenant_from_remote(credential, config.azure) 
+        
+            save_yaml(config.yaml_config, open(file,"w"))
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
-    except KeyError as ke:
-        click.echo(str(ke))
-    except CredentialUnavailableError as login_error:
-        click.echo(str(login_error))    
+    except Exception as e:
+        click.echo(str(e))
 
 @main.command()
 @click.option("-t","--type", required=True, type=click.Choice(['azure']), help="One of supported cloud provider: 'azure'")
@@ -73,10 +69,8 @@ def describe(type, subscription_id):
 
         save_yaml(config.yaml_config, sys.stdout)
 
-    except KeyError as ke:
-        click.echo(str(ke))
-    except CredentialUnavailableError as login_error:
-        click.echo(str(login_error))   
+    except Exception as e:
+        click.echo(str(e))
 
 
 
