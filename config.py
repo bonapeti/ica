@@ -16,62 +16,56 @@ def expect_string(dict_var, name, error_message):
 
 class Config:
 
-    yaml = None
     yaml_config = None
     azure = None
     
 
-    def __init__(self, yaml, yaml_config, azure):
-        self.yaml = yaml
+    def __init__(self, yaml_config, azure):
         self.yaml_config = yaml_config
         self.azure = azure
 
     def __repr__(self):
         return f"Config('{self.azure}')"
 
-    @staticmethod
-    def new_azure_config(tenant_id, subscription_id, subscription_name):
-        output_yaml=f"""\
+def new_azure_config(tenant_id, subscription_id, subscription_name):
+    output_yaml=f"""\
 - cloud: azure
   tenantId: {tenant_id}
   subscriptions:
   - id: {subscription_id}
     name: {subscription_name}
 """
-        return Config.load(output_yaml)
+    return load_yaml(output_yaml)
 
-    @staticmethod
-    def load(source):
-        yaml = YAML()
-        yaml_config = yaml.load(source)
-        
-        not_supported_providers = {provider.get("cloud","") for provider in yaml_config if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
-        for not_supported in not_supported_providers:
-            print(f"Cloud provider '{not_supported}' is not supported")
+def load_yaml(source):
+    yaml = YAML()
+    yaml_config = yaml.load(source)
+    
+    not_supported_providers = {provider.get("cloud","") for provider in yaml_config if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
+    for not_supported in not_supported_providers:
+        print(f"Cloud provider '{not_supported}' is not supported")
 
-        azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
-        if len(azure_providers) == 0:
-            raise ValueError("Missing Azure tenant")
+    azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
+    if len(azure_providers) == 0:
+        raise ValueError("Missing Azure tenant")
 
-        if len(azure_providers) > 1:
-            raise ValueError("More than one Azure tenant defined, only one expected!")
-        
-        azure_tenant = azure_providers[0]
-        
-        expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
+    if len(azure_providers) > 1:
+        raise ValueError("More than one Azure tenant defined, only one expected!")
+    
+    azure_tenant = azure_providers[0]
+    
+    expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
 
-        assert azure_tenant["subscriptions"], "Missing 'subscriptions' under azure cloud configuration"
-        
-        azure_config = AzureConfig(azure_tenant)
-        return Config(yaml, yaml_config, azure_config)
+    assert azure_tenant["subscriptions"], "Missing 'subscriptions' under azure cloud configuration"
+    
+    azure_config = AzureTenant(azure_tenant)
+    return Config(yaml_config, azure_config)
 
-    def save(self, ostream):
-        self.yaml.dump(self.yaml_config, ostream)
+def save_yaml(yaml_config, ostream):
+    yaml = YAML()
+    yaml.dump(yaml_config, ostream)
 
-   
-
-
-class AzureConfig:
+class AzureTenant:
 
     id = None
     subscriptions = []

@@ -1,5 +1,5 @@
 import click
-from config import Config
+from config import save_yaml, load_yaml, new_azure_config
 from azure.identity import AzureCliCredential
 from azure.identity._exceptions import CredentialUnavailableError
 from azure.mgmt.resource.subscriptions import SubscriptionClient
@@ -22,7 +22,7 @@ def status(file):
 
     try:
         stream = open(file,"r")
-        config = Config.load(stream)
+        config = load_yaml(stream)
 
         subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions )
 
@@ -47,7 +47,7 @@ def pull(file):
 
     try:
         stream = open(file,"r")
-        config = Config.load(stream)
+        config = load_yaml(stream)
 
         subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
 
@@ -55,7 +55,7 @@ def pull(file):
             for resource in resource_list:
                 subscription.add_resource({"name": resource.name, "type": resource.type })
     
-        config.save(open(file,"w"))
+        save_yaml(config.yaml_config, open(file,"w"))
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -76,7 +76,7 @@ def describe(type, subscription_id):
         subscription_client = SubscriptionClient(credentials)
         az_subscription = subscription_client.subscriptions.get(subscription_id)
 
-        config = Config.new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
+        config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
 
         subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
 
@@ -84,7 +84,7 @@ def describe(type, subscription_id):
             for resource in resource_list:
                 subscription.add_resource({"name": resource.name, "type": resource.type })
 
-        config.save(sys.stdout)
+        save_yaml(config.yaml_config, sys.stdout)
 
     except KeyError as ke:
         click.echo(str(ke))

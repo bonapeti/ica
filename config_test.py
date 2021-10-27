@@ -1,4 +1,4 @@
-from config import Config
+from config import load_yaml, save_yaml
 import io
 import pytest
 
@@ -16,12 +16,12 @@ TEST_YAML=f"""\
 
 def test_not_supported_provider(cli_runner):
     with pytest.raises(ValueError):
-        Config.load(f"""\
+        load_yaml(f"""\
 - cloud: unknown_cloud
 """)
 
 def test_load_azure_tenant(cli_runner):
-    config = Config.load(TEST_YAML)
+    config = load_yaml(TEST_YAML)
     tenant = config.azure
     
     assert tenant.id == TENANT_ID
@@ -31,10 +31,10 @@ def test_load_azure_tenant(cli_runner):
     assert subscription.name == SUBSCRIPTION_NAME
 
 def test_save_azure_resources(cli_runner):
-    config = Config.load(TEST_YAML)
+    config = load_yaml(TEST_YAML)
     config.azure.subscriptions[0].add_resource({"name": "boo", "type": "baa" })
     with io.StringIO() as test_output:
-      config.save(test_output)
+      save_yaml(config.yaml_config, test_output)
       expected_content = f"""\
 - cloud: azure
   tenantId: {TENANT_ID}
