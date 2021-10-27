@@ -25,8 +25,7 @@ def status(file):
         config = load_yaml(stream)
 
         with AzureCliCredential() as credential:
-            for subscription in config.azure.subscriptions:
-                azure_api.compare_subscription_with_remote(credential, subscription, click)
+            azure_api.compare_tenant_with_remote(credential, config.azure, click) 
         
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -45,8 +44,7 @@ def pull(file):
         config = load_yaml(stream)
 
         with AzureCliCredential() as credential:
-            for subscription in config.azure.subscriptions:
-                azure_api.update_subscription_from_remote(credential, subscription)
+            azure_api.update_tenant_from_remote(credential, config.azure) 
     
         save_yaml(config.yaml_config, open(file,"w"))
 
@@ -71,8 +69,7 @@ def describe(type, subscription_id):
 
         config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
 
-        for subscription in config.azure.subscriptions:
-            azure_api.update_subscription_from_remote(credential, subscription)
+        azure_api.update_tenant_from_remote(credential, config.azure)    
 
         save_yaml(config.yaml_config, sys.stdout)
 
