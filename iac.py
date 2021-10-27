@@ -24,15 +24,10 @@ def status(file):
         stream = open(file,"r")
         config = load_yaml(stream)
 
-        subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions )
-
-        for subscription, resource_list in subscription_resources.items():
-            click.echo(f"Azure subscription '{subscription.name}'")
-            if len(resource_list) == subscription.local_resource_count():
-                click.echo("\tNo changes")
-            else:
-                click.echo("\tThere are differences")
-    
+        with AzureCliCredential() as credential:
+            for subscription in config.azure.subscriptions:
+                azure_api.compare_subscription_with_remote(credential, subscription, click)
+        
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
     except KeyError as ke:
@@ -49,11 +44,9 @@ def pull(file):
         stream = open(file,"r")
         config = load_yaml(stream)
 
-        subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
-
-        for subscription, resource_list in subscription_resources.items():
-            for resource in resource_list:
-                subscription.add_resource({"name": resource.name, "type": resource.type })
+        with AzureCliCredential() as credential:
+            for subscription in config.azure.subscriptions:
+                azure_api.update_subscription_from_remote(credential, subscription)
     
         save_yaml(config.yaml_config, open(file,"w"))
 
@@ -72,17 +65,14 @@ def describe(type, subscription_id):
 
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
-        credentials = AzureCliCredential()
-        subscription_client = SubscriptionClient(credentials)
+        credential = AzureCliCredential()
+        subscription_client = SubscriptionClient(credential)
         az_subscription = subscription_client.subscriptions.get(subscription_id)
 
         config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
 
-        subscription_resources = azure_api.get_resource_list(config.azure.id, config.azure.subscriptions)
-
-        for subscription, resource_list in subscription_resources.items():
-            for resource in resource_list:
-                subscription.add_resource({"name": resource.name, "type": resource.type })
+        for subscription in config.azure.subscriptions:
+            azure_api.update_subscription_from_remote(credential, subscription)
 
         save_yaml(config.yaml_config, sys.stdout)
 
@@ -90,6 +80,7 @@ def describe(type, subscription_id):
         click.echo(str(ke))
     except CredentialUnavailableError as login_error:
         click.echo(str(login_error))   
+
 
 
 if __name__ == '__main__':
