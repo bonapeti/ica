@@ -6,8 +6,8 @@ AZURE="azure"
 YAML_TENANT_ID="tenantId"
 YAML_SUBSCRIPTION_ID="id"
 YAML_SUBSCRIPTION_NAME="name"
-YAML_SUBSCRIPTIONS="subscriptions"
-YAML_RESOURCES="resources"
+YAML_SUBSCRIPTION_LIST="subscriptions"
+YAML_RESOURCES_LIST="resources"
 YAML_AZURE_RESOURCE_NAME="name"
 YAML_AZURE_RESOURCE_TYPE="type"
 
@@ -62,7 +62,7 @@ def load_yaml(source):
     
     expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
 
-    assert azure_tenant[YAML_SUBSCRIPTIONS], f"Missing '{YAML_SUBSCRIPTIONS}' under azure cloud configuration"
+    assert azure_tenant[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
     
     azure_config = AzureTenant(azure_tenant)
     return Config(yaml_config, azure_config)
@@ -97,12 +97,12 @@ class AzureSubscription:
         self.yaml_config = yaml_subscription
 
     def add_resource(self, new_resource):
-        if not YAML_RESOURCES in self.yaml_config:
-            self.yaml_config[YAML_RESOURCES] = []
-        self.yaml_config[YAML_RESOURCES].append(new_resource)
+        if not YAML_RESOURCES_LIST in self.yaml_config:
+            self.yaml_config[YAML_RESOURCES_LIST] = []
+        self.yaml_config[YAML_RESOURCES_LIST].append(new_resource)
 
     def local_resource_count(self):
-        return len(self.yaml_config.get(YAML_RESOURCES,[]))
+        return len(self.yaml_config.get(YAML_RESOURCES_LIST,[]))
 
 
     def __repr__(self):
