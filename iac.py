@@ -1,10 +1,8 @@
 import click
-from config import save_yaml, load_yaml, new_azure_config
+from config import save_yaml, load_yaml, new_azure_config, compare_tenant_with_remote, update_tenant_from_remote
 from azure.identity import AzureCliCredential
-from azure.identity._exceptions import CredentialUnavailableError
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
-import azure_api
 
 default_filename = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
@@ -22,10 +20,10 @@ def status(file):
 
     try:
         with open(file,"r") as stream:
-            config = load_yaml(stream)
+            yaml_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                azure_api.compare_tenant_with_remote(credential, config.azure, click) 
+                compare_tenant_with_remote(credential, yaml_config.azure, click) 
             
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -39,12 +37,12 @@ def pull(file):
 
     try:
         with open(file,"r") as stream:
-            config = load_yaml(stream)
+            yaml_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                azure_api.update_tenant_from_remote(credential, config.azure) 
+                update_tenant_from_remote(credential, yaml_config.azure) 
         
-            save_yaml(config.yaml_config, open(file,"w"))
+            save_yaml(yaml_config.yaml_config, open(file,"w"))
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -63,11 +61,11 @@ def describe(type, subscription_id):
         subscription_client = SubscriptionClient(credential)
         az_subscription = subscription_client.subscriptions.get(subscription_id)
 
-        config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
+        yaml_config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
 
-        azure_api.update_tenant_from_remote(credential, config.azure)    
+        update_tenant_from_remote(credential, yaml_config.azure)    
 
-        save_yaml(config.yaml_config, sys.stdout)
+        save_yaml(yaml_config.yaml_config, sys.stdout)
 
     except Exception as e:
         click.echo(str(e))
