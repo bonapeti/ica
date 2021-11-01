@@ -64,7 +64,7 @@ def test_update_subscription_from_remote():
     config.update_subscription_from_remote(None, subscription, mock_get_resources)
     assert { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
              config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME,
-             config.YAML_RESOURCES: 
+             config.YAML_RESOURCES_LIST: 
                  [ 
                     { 
                       config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name, 
