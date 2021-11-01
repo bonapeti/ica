@@ -128,7 +128,10 @@ def compare_tenant_with_remote(credential, tenant, output):
 def update_subscription_from_remote(credentials, subscription, get_resources = __get_resources_from_azure):
 
     for resource in get_resources(credentials, subscription.id):
-        subscription.add_resource({ YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type })
+        local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }
+        if resource.tags:
+            local_resource["tags"] = resource.tags
+        subscription.add_resource(local_resource)
 
 
 

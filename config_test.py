@@ -52,6 +52,7 @@ def test_save_azure_resources(cli_runner):
 class MockAzureResource:
     name =  "AzureResource"
     type = "AzureResourceType"
+    tags = { "name": "value"}
 
 def test_update_subscription_from_remote():
 
@@ -68,7 +69,8 @@ def test_update_subscription_from_remote():
                  [ 
                     { 
                       config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name, 
-                      config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type 
+                      config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
+                      "tags": { "name": "value" }
                     }
                  ]
             
