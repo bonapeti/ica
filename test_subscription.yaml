@@ -6,5 +6,7 @@
     resources:
     - name: NetworkWatcher_centralus
       type: Microsoft.Network/networkWatchers
+      location: centralus
     - name: NetworkWatcher_northeurope
       type: Microsoft.Network/networkWatchers
+      location: northeurope

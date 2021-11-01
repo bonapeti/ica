@@ -53,6 +53,10 @@ class MockAzureResource:
     name =  "AzureResource"
     type = "AzureResourceType"
     tags = { "name": "value"}
+    location = "northeurope"
+    kind = None
+    identity = None
+    managed_by = None
 
 def test_update_subscription_from_remote():
 
@@ -70,6 +74,7 @@ def test_update_subscription_from_remote():
                     { 
                       config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name, 
                       config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
+                      "location": "northeurope",
                       "tags": { "name": "value" }
                     }
                  ]

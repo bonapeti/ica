@@ -129,6 +129,13 @@ def update_subscription_from_remote(credentials, subscription, get_resources = _
 
     for resource in get_resources(credentials, subscription.id):
         local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }
+        local_resource["location"] = resource.location
+        if resource.kind:
+            local_resource["kind"] = resource.kind
+        if resource.managed_by:
+            local_resource["managed_by"] = resource.managed_by
+        if resource.identity:
+            local_resource["identity"] = resource.identity
         if resource.tags:
             local_resource["tags"] = resource.tags
         subscription.add_resource(local_resource)
