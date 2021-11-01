@@ -1,6 +1,7 @@
 from azure.mgmt.resource import ResourceManagementClient
 from ruamel.yaml import YAML
-
+import logging
+from function_timeit import timeit
 
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
@@ -80,7 +81,7 @@ class AzureTenant:
     def __init__(self, azure_yaml):
         self.id = azure_yaml[YAML_TENANT_ID]
         self.yaml_config = azure_yaml
-        self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml["subscriptions"]))
+        self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml[YAML_SUBSCRIPTION_LIST]))
 
     def __repr__(self):
         return f"Azure(tenantId='{self.id}')"
@@ -111,9 +112,11 @@ class AzureSubscription:
     def __str__(self):
         return self.name if self.name else self.id
 
+@timeit
 def __get_resources_from_azure(credentials, subscription_id):
     assert subscription_id, "Missing subscription ID"
-
+    
+    logging.debug(f"Getting list of resources from Azure subscription '{subscription_id}'")
     with ResourceManagementClient(credentials, subscription_id) as resource_client:
         return list(resource_client.resources.list(expand="createdTime,changedTime,provisioningState"))
 

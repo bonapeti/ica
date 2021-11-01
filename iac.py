@@ -3,21 +3,25 @@ from config import save_yaml, load_yaml, new_azure_config, compare_tenant_with_r
 from azure.identity import AzureCliCredential
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
+import logging
 
 default_filename = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
 
 @click.group()
 @click.version_option(version="0.0.2")
-def main():
+@click.option('--debug/--no-debug', default=False)
+def main(debug):
     """Manages cloud infrastructure as code"""
-    pass
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
 
 @main.command()
 @click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
 def status(file):
     """Shows differences between local and cloud infrastructure"""
 
+    logging.debug(f"Calling 'status' command with config file {file}")
     try:
         with open(file,"r") as stream:
             yaml_config = load_yaml(stream)
@@ -55,6 +59,7 @@ def pull(file):
 def describe(type, subscription_id):
     """Prints cloud infrastructure to stdout as YAML"""
 
+    logging.debug("Calling 'desribe' command")
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
         credential = AzureCliCredential()
