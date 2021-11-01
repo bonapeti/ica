@@ -29,7 +29,7 @@ def test_describe(cli_runner):
     assert result.exit_code == 0
 
 
-def test_diff_with_file(cli_runner):
+def test_pull_with_file(cli_runner):
 
     with cli_runner.isolated_filesystem():
       prepare_test_config_file()
