@@ -138,6 +138,8 @@ def update_subscription_from_remote(credentials, subscription, get_resources = _
             local_resource["identity"] = resource.identity
         if resource.tags:
             local_resource["tags"] = resource.tags
+        if resource.properties:
+            local_resource["properties"] = resource.properties
         subscription.add_resource(local_resource)
 
 
