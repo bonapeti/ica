@@ -1,6 +1,6 @@
 import logging
 from ruamel.yaml import YAML
-from azure_api import get_resources, get_resource_groups
+from azure_api import get_resources
 
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
@@ -113,7 +113,7 @@ class AzureSubscription:
             self.yaml_config[YAML_RESOURCES_LIST] = []
         self.yaml_config[YAML_RESOURCES_LIST].append(new_resource)
 
-    def update_from_remote(self, credentials, get_resources = get_resources, get_resource_groups = get_resource_groups):
+    def update_from_remote(self, credentials, get_resources = get_resources):
 
         for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
             self.add_resource_group(remote_resource_group_name)
