@@ -1,5 +1,5 @@
 import click
-from config import save_yaml, load_yaml, new_azure_config, compare_tenant_with_remote, update_tenant_from_remote
+from config import save_yaml, load_yaml, new_azure_config, compare_tenant_with_remote
 from azure.identity import AzureCliCredential
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
@@ -44,7 +44,7 @@ def pull(file):
             yaml_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                update_tenant_from_remote(credential, yaml_config.azure) 
+                yaml_config.azure.update_from_remote(credential) 
         
             save_yaml(yaml_config.yaml_config, open(file,"w"))
 
@@ -68,7 +68,7 @@ def describe(type, subscription_id):
 
         yaml_config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
 
-        update_tenant_from_remote(credential, yaml_config.azure)    
+        yaml_config.azure.update_from_remote(credential)    
 
         save_yaml(yaml_config.yaml_config, sys.stdout)
 

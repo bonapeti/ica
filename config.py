@@ -1,4 +1,4 @@
-
+import logging
 from ruamel.yaml import YAML
 from azure_api import get_resources, get_resource_groups
 
@@ -8,6 +8,7 @@ YAML_SUBSCRIPTION_ID="id"
 YAML_SUBSCRIPTION_NAME="name"
 YAML_SUBSCRIPTION_LIST="subscriptions"
 YAML_RESOURCES_LIST="resources"
+YAML_RESOURCE_GROUP_LIST="resourceGroups"
 YAML_AZURE_RESOURCE_NAME="name"
 YAML_AZURE_RESOURCE_TYPE="type"
 
@@ -82,6 +83,11 @@ class AzureTenant:
         self.yaml_config = azure_yaml
         self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml[YAML_SUBSCRIPTION_LIST]))
 
+    def update_from_remote(self, credential):
+        for subscription in self.subscriptions:
+            subscription.update_from_remote(credential)
+
+
     def __repr__(self):
         return f"Azure(tenantId='{self.id}')"
     
@@ -96,10 +102,33 @@ class AzureSubscription:
         self.name = yaml_subscription[YAML_SUBSCRIPTION_NAME]
         self.yaml_config = yaml_subscription
 
+    def add_resource_group(self, new_resource_group_name):
+        if not YAML_RESOURCE_GROUP_LIST in self.yaml_config:
+            self.yaml_config[YAML_RESOURCE_GROUP_LIST] = {  }
+        logging.debug(f"Adding resource group {new_resource_group_name}")
+        self.yaml_config[YAML_RESOURCE_GROUP_LIST][new_resource_group_name]={ YAML_RESOURCES_LIST: [] }
+
     def add_resource(self, new_resource):
         if not YAML_RESOURCES_LIST in self.yaml_config:
             self.yaml_config[YAML_RESOURCES_LIST] = []
         self.yaml_config[YAML_RESOURCES_LIST].append(new_resource)
+
+    def update_from_remote(self, credentials, get_resources = get_resources, get_resource_groups = get_resource_groups):
+
+        for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
+            self.add_resource_group(remote_resource_group_name)
+            for resource in remote_resource_list:
+                local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }
+                local_resource["location"] = resource.location
+                if resource.kind:
+                    local_resource["kind"] = resource.kind
+                if resource.managed_by:
+                    local_resource["managed_by"] = resource.managed_by
+                if resource.tags:
+                    local_resource["tags"] = resource.tags
+                self.yaml_config[YAML_RESOURCE_GROUP_LIST][remote_resource_group_name][YAML_RESOURCES_LIST].append(local_resource)
+
+
 
     def local_resource_count(self):
         return len(self.yaml_config.get(YAML_RESOURCES_LIST,[]))
@@ -111,31 +140,9 @@ class AzureSubscription:
     def __str__(self):
         return self.name if self.name else self.id
 
-
-
-def update_tenant_from_remote(credential, tenant):
-    for subscription in tenant.subscriptions:
-        update_subscription_from_remote(credential, subscription)
-
 def compare_tenant_with_remote(credential, tenant, output):
     for subscription in tenant.subscriptions:
         compare_subscription_with_remote(credential, subscription, output)
-
-def update_subscription_from_remote(credentials, subscription, get_resources = get_resources, get_resource_groups = get_resource_groups):
-
-    for resource in get_resources(credentials, subscription.id):
-        local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }
-        local_resource["location"] = resource.location
-        if resource.kind:
-            local_resource["kind"] = resource.kind
-        if resource.managed_by:
-            local_resource["managed_by"] = resource.managed_by
-        if resource.tags:
-            local_resource["tags"] = resource.tags
-        subscription.add_resource(local_resource)
-
-
-
 
 def compare_subscription_with_remote(credentials, subscription, output, get_resources = get_resources):
 

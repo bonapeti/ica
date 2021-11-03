@@ -57,26 +57,38 @@ class MockAzureResource:
     kind = None
     identity = None
     managed_by = None
+    resource_group_name = "test_resource_group"
+
+class MockAzureResourceGroup:
+    name = "test_resource_group"
 
 def test_update_subscription_from_remote():
 
     resource = MockAzureResource()
 
     def mock_get_resources(credentials, subscription_id):
-        return [ resource ]
+      return { "test_resource_group": [ resource] }
+
+    def mock_get_resource_groups(credentials, subscription_id):
+      return [ MockAzureResourceGroup() ] 
 
     subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID, config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME })
-    config.update_subscription_from_remote(None, subscription, mock_get_resources)
+    subscription.update_from_remote(None, mock_get_resources, mock_get_resource_groups)
     assert { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
              config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME,
-             config.YAML_RESOURCES_LIST: 
-                 [ 
-                    { 
-                      config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name, 
-                      config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
-                      "location": "northeurope",
-                      "tags": { "name": "value" }
-                    }
-                 ]
-            
+             "resourceGroups":
+                {
+                  "test_resource_group":
+                  {
+                    config.YAML_RESOURCES_LIST: 
+                    [ 
+                        { 
+                          config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name, 
+                          config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
+                          "location": "northeurope",
+                          "tags": { "name": "value" }
+                        }
+                    ]
+                  }
+                }
             } == subscription.yaml_config
