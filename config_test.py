@@ -69,11 +69,8 @@ def test_update_subscription_from_remote():
     def mock_get_resources(credentials, subscription_id):
       return { "test_resource_group": [ resource] }
 
-    def mock_get_resource_groups(credentials, subscription_id):
-      return [ MockAzureResourceGroup() ] 
-
     subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID, config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME })
-    subscription.update_from_remote(None, mock_get_resources, mock_get_resource_groups)
+    subscription.update_from_remote(None, mock_get_resources)
     assert { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
              config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME,
              "resourceGroups":
