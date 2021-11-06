@@ -18,7 +18,7 @@ def test_status_with_file(cli_runner):
     with cli_runner.isolated_filesystem():
       prepare_test_config_file()
       result = cli_runner.invoke(main, ["status"])
-      assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\n\tThere are differences\n"
+      assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\n\tThere are differences. Local: 0, remote: 2\n"
       assert result.exit_code == 0
 
 def test_describe(cli_runner):

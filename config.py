@@ -87,10 +87,25 @@ class AzureTenant:
         for subscription in self.subscriptions:
             subscription.update_from_remote(credential)
 
+    def compare_with_remote(self, credential, output):
+        for subscription in self.subscriptions:
+            subscription.compare_with_remote(credential, output)
+
 
     def __repr__(self):
         return f"Azure(tenantId='{self.id}')"
-    
+
+class AzureResourceGroup:
+
+    name = None
+    resources = {}
+
+    def __init__(self, name):
+        self.name = name
+
+    def add_resource(self, resource):
+        self.resources[resource.name] = resource
+
 class AzureSubscription:
 
     id = None
@@ -108,10 +123,9 @@ class AzureSubscription:
         logging.debug(f"Adding resource group {new_resource_group_name}")
         self.yaml_config[YAML_RESOURCE_GROUP_LIST][new_resource_group_name]={ YAML_RESOURCES_LIST: [] }
 
-    def add_resource(self, new_resource):
-        if not YAML_RESOURCES_LIST in self.yaml_config:
-            self.yaml_config[YAML_RESOURCES_LIST] = []
-        self.yaml_config[YAML_RESOURCES_LIST].append(new_resource)
+    def add_resource(self, new_resource_group_name, new_resource):
+        self.add_resource_group(new_resource_group_name)
+        self.yaml_config[YAML_RESOURCE_GROUP_LIST][new_resource_group_name][YAML_RESOURCES_LIST].append(new_resource)
 
     def update_from_remote(self, credentials, get_resources = get_resources):
 
@@ -128,10 +142,26 @@ class AzureSubscription:
                     local_resource["tags"] = resource.tags
                 self.yaml_config[YAML_RESOURCE_GROUP_LIST][remote_resource_group_name][YAML_RESOURCES_LIST].append(local_resource)
 
+    def compare_with_remote(self, credentials, output, get_resources = get_resources):
 
+        remote_resource_count = 0
+        for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
+            remote_resource_count = remote_resource_count + len(remote_resource_list)
+        output.echo(f"Azure subscription '{self.name}'")
+        if remote_resource_count == self.local_resource_count():
+            output.echo("\tNo changes")
+        else:
+            output.echo(f"\tThere are differences. Local: {self.local_resource_count()}, remote: {remote_resource_count}")
 
     def local_resource_count(self):
-        return len(self.yaml_config.get(YAML_RESOURCES_LIST,[]))
+        local_resource_count = 0
+        local_resource_groups = {}
+        if YAML_RESOURCE_GROUP_LIST in self.yaml_config:
+            local_resource_groups = self.yaml_config[YAML_RESOURCE_GROUP_LIST]
+
+        for resource_group_name, local_resource_map in local_resource_groups.items():
+            local_resource_count = local_resource_count + len(local_resource_map[YAML_RESOURCES_LIST])
+        return local_resource_count
 
 
     def __repr__(self):
@@ -140,18 +170,9 @@ class AzureSubscription:
     def __str__(self):
         return self.name if self.name else self.id
 
-def compare_tenant_with_remote(credential, tenant, output):
-    for subscription in tenant.subscriptions:
-        compare_subscription_with_remote(credential, subscription, output)
 
-def compare_subscription_with_remote(credentials, subscription, output, get_resources = get_resources):
 
-    remote_resources = get_resources(credentials, subscription.id)
-    output.echo(f"Azure subscription '{subscription.name}'")
-    if len(remote_resources) == subscription.local_resource_count():
-        output.echo("\tNo changes")
-    else:
-        output.echo("\tThere are differences")
+
 
 
         

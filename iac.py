@@ -1,5 +1,5 @@
 import click
-from config import save_yaml, load_yaml, new_azure_config, compare_tenant_with_remote
+from config import save_yaml, load_yaml, new_azure_config
 from azure.identity import AzureCliCredential
 from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
@@ -28,7 +28,7 @@ def status(file):
             yaml_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                compare_tenant_with_remote(credential, yaml_config.azure, click) 
+                yaml_config.azure.compare_with_remote(credential, click) 
             
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
