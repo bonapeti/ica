@@ -97,17 +97,6 @@ class AzureTenant:
     def __repr__(self):
         return f"Azure(tenantId='{self.id}')"
 
-class AzureResourceGroup:
-
-    name = None
-    resources = {}
-
-    def __init__(self, name):
-        self.name = name
-
-    def add_resource(self, resource):
-        self.resources[resource.name] = resource
-
 class AzureSubscription:
 
     id = None
