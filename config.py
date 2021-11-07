@@ -132,14 +132,7 @@ class AzureSubscription:
         for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
             self.add_resource_group(remote_resource_group_name)
             for resource in remote_resource_list:
-                local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }
-                local_resource["location"] = resource.location
-                if resource.kind:
-                    local_resource["kind"] = resource.kind
-                if resource.managed_by:
-                    local_resource["managed_by"] = resource.managed_by
-                if resource.tags:
-                    local_resource["tags"] = resource.tags
+                local_resource = self.__convert_resource_to_local(resource)
                 self.yaml_config[YAML_RESOURCE_GROUP_LIST][remote_resource_group_name][YAML_RESOURCES_LIST].append(local_resource)
 
     def compare_with_remote(self, credentials, output, get_resources = get_resources):
@@ -155,6 +148,17 @@ class AzureSubscription:
             output.echo("\tNo changes")
         else:
             output.echo(f"\tThere are differences. Local: {local_resource_count}, remote: {remote_resource_count}")
+
+    def __convert_resource_to_local(self, resource):
+        local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }
+        local_resource["location"] = resource.location
+        if resource.kind:
+            local_resource["kind"] = resource.kind
+        if resource.managed_by:
+            local_resource["managed_by"] = resource.managed_by
+        if resource.tags:
+            local_resource["tags"] = resource.tags
+        return local_resource
 
     def __local_resources_count(self):
         """Returns the number of resource groups and resources in local config file as tuple"""
