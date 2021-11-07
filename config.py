@@ -150,13 +150,13 @@ class AzureSubscription:
             remote_resource_group_count = remote_resource_group_count + 1
             remote_resource_count = remote_resource_count + len(remote_resource_list)
         output.echo(f"Azure subscription '{self.name}'")
-        (local_resource_group_count, local_resource_count) = self.local_resources_count()
+        (local_resource_group_count, local_resource_count) = self.__local_resources_count()
         if (remote_resource_group_count, remote_resource_count) == (local_resource_group_count, local_resource_count):
             output.echo("\tNo changes")
         else:
             output.echo(f"\tThere are differences. Local: {local_resource_count}, remote: {remote_resource_count}")
 
-    def local_resources_count(self):
+    def __local_resources_count(self):
         """Returns the number of resource groups and resources in local config file as tuple"""
 
         local_resource_groups_count = 0

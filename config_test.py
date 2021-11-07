@@ -29,7 +29,6 @@ def test_load_azure_tenant(cli_runner):
     subscription = tenant.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
     assert subscription.name == TEST_SUBSCRIPTION_NAME
-    assert subscription.local_resources_count() == (0,0)
     
 
 def test_save_azure_resources(cli_runner):
