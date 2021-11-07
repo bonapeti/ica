@@ -29,12 +29,14 @@ def test_load_azure_tenant(cli_runner):
     subscription = tenant.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
     assert subscription.name == TEST_SUBSCRIPTION_NAME
+    assert subscription.local_resources_count() == (0,0)
+    
 
 def test_save_azure_resources(cli_runner):
     yaml_config = config.load_yaml(TEST_YAML)
     yaml_config.azure.subscriptions[0].add_resource_group("test_resource_group")
     yaml_config.azure.subscriptions[0].add_resource("test_resource_group", {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
-    assert 1 == yaml_config.azure.subscriptions[0].local_resource_count()
+    assert (1,1) == yaml_config.azure.subscriptions[0].local_resources_count()
     with io.StringIO() as test_output:
       config.save_yaml(yaml_config.yaml_config, test_output)
       expected_content = f"""\

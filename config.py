@@ -144,24 +144,29 @@ class AzureSubscription:
 
     def compare_with_remote(self, credentials, output, get_resources = get_resources):
 
+        remote_resource_group_count = 0
         remote_resource_count = 0
         for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
+            remote_resource_group_count = remote_resource_group_count + 1
             remote_resource_count = remote_resource_count + len(remote_resource_list)
         output.echo(f"Azure subscription '{self.name}'")
-        if remote_resource_count == self.local_resource_count():
+        (local_resource_group_count, local_resource_count) = self.local_resources_count()
+        if (remote_resource_group_count, remote_resource_count) == (local_resource_group_count, local_resource_count):
             output.echo("\tNo changes")
         else:
-            output.echo(f"\tThere are differences. Local: {self.local_resource_count()}, remote: {remote_resource_count}")
+            output.echo(f"\tThere are differences. Local: {local_resource_count}, remote: {remote_resource_count}")
 
-    def local_resource_count(self):
+    def local_resources_count(self):
+        local_resource_groups_count = 0
         local_resource_count = 0
         local_resource_groups = {}
         if YAML_RESOURCE_GROUP_LIST in self.yaml_config:
             local_resource_groups = self.yaml_config[YAML_RESOURCE_GROUP_LIST]
 
         for resource_group_name, local_resource_map in local_resource_groups.items():
+            local_resource_groups_count = local_resource_groups_count + 1
             local_resource_count = local_resource_count + len(local_resource_map[YAML_RESOURCES_LIST])
-        return local_resource_count
+        return local_resource_groups_count, local_resource_count
 
 
     def __repr__(self):
