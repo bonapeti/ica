@@ -36,10 +36,9 @@ def test_save_azure_resources(cli_runner):
     yaml_config = config.load_yaml(TEST_YAML)
     yaml_config.azure.subscriptions[0].add_resource_group("test_resource_group")
     yaml_config.azure.subscriptions[0].add_resource("test_resource_group", {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
-    assert (1,1) == yaml_config.azure.subscriptions[0].local_resources_count()
     with io.StringIO() as test_output:
       config.save_yaml(yaml_config.yaml_config, test_output)
-      expected_content = f"""\
+      assert test_output.getvalue() == f"""\
 - cloud: azure
   tenantId: {TENANT_ID}
   subscriptions:
@@ -51,7 +50,6 @@ def test_save_azure_resources(cli_runner):
         - name: boo
           type: baa
 """
-      assert expected_content == test_output.getvalue()
 
 
 
@@ -86,7 +84,7 @@ def test_update_subscription_from_remote():
 
     subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID, config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME })
     subscription.update_from_remote(None, mock_get_resources)
-    assert { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
+    assert subscription.yaml_config == { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
              config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME,
              "resourceGroups":
                 {
@@ -103,7 +101,7 @@ def test_update_subscription_from_remote():
                     ]
                   }
                 }
-            } == subscription.yaml_config
+            }
 
 def test_compare_subscription_with_remote():
 
@@ -116,4 +114,4 @@ def test_compare_subscription_with_remote():
     mock_click = MockClick()
     
     subscription.compare_with_remote(None, mock_click, mock_get_resources)
-    assert f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\tThere are differences. Local: 0, remote: 1" == mock_click.get_content()
+    assert mock_click.get_content() == f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\tThere are differences. Local: 0, remote: 1"

@@ -157,6 +157,8 @@ class AzureSubscription:
             output.echo(f"\tThere are differences. Local: {local_resource_count}, remote: {remote_resource_count}")
 
     def local_resources_count(self):
+        """Returns the number of resource groups and resources in local config file as tuple"""
+
         local_resource_groups_count = 0
         local_resource_count = 0
         local_resource_groups = {}
