@@ -90,7 +90,7 @@ def test_update_subscription_from_remote():
     
     assert subscription.yaml_config == { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
              config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME,
-             "resourceGroups":
+             config.YAML_RESOURCE_GROUP_LIST:
                 {
                   TEST_RESOURCE_GROUP:
                   {
