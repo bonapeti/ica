@@ -22,10 +22,11 @@ def test_not_supported_provider(cli_runner):
 
 def test_load_azure_tenant(cli_runner):
     yaml_config = config.load_yaml(TEST_YAML)
-    tenant = yaml_config.azure
     
+    tenant = yaml_config.azure
     assert tenant.id == TENANT_ID
     assert len(tenant.subscriptions) == 1
+
     subscription = tenant.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
     assert subscription.name == TEST_SUBSCRIPTION_NAME
@@ -113,4 +114,5 @@ def test_compare_subscription_with_remote():
     mock_click = MockClick()
     
     subscription.compare_with_remote(None, mock_click, mock_get_resources)
+    
     assert mock_click.get_content() == f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\tThere are differences. Local: 0, remote: 1"
