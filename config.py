@@ -34,7 +34,7 @@ class Config:
     def __repr__(self):
         return f"Config('{self.azure}')"
 
-def new_azure_config(tenant_id, subscription_id, subscription_name):
+def new_azure_config(subscription_id):
     output_yaml=f"""\
 - cloud: {AZURE}
   subscriptions:

@@ -64,10 +64,8 @@ def describe(type, subscription_id):
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
         credential = AzureCliCredential()
-        subscription_client = SubscriptionClient(credential)
-        az_subscription = subscription_client.subscriptions.get(subscription_id)
 
-        yaml_config = new_azure_config(az_subscription.tenant_id, subscription_id, az_subscription.display_name)
+        yaml_config = new_azure_config(subscription_id)
 
         yaml_config.azure.update_from_remote(credential)    
 
