@@ -4,7 +4,6 @@ import pytest
 
 TENANT_ID="900a843e-af52-4bc8-9009-4676366d9d97"
 TEST_SUBSCRIPTION_ID="5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
-TEST_SUBSCRIPTION_NAME="TEST_SUBSCRIPTION_NAME"
 TEST_LOCATION_NORTH_EUROPE = "northeurope"
 TEST_RESOURCE_GROUP = "test_resource_group"
 
@@ -13,7 +12,6 @@ TEST_YAML=f"""\
   tenantId: {TENANT_ID}
   subscriptions:
   - id: {TEST_SUBSCRIPTION_ID}
-    name: {TEST_SUBSCRIPTION_NAME}
 """
 
 def test_not_supported_provider(cli_runner):
@@ -31,7 +29,6 @@ def test_load_azure_tenant(cli_runner):
 
     subscription = tenant.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
-    assert subscription.name == TEST_SUBSCRIPTION_NAME
     
 
 def test_save_azure_resources(cli_runner):
@@ -45,7 +42,6 @@ def test_save_azure_resources(cli_runner):
   tenantId: {TENANT_ID}
   subscriptions:
   - id: {TEST_SUBSCRIPTION_ID}
-    name: {TEST_SUBSCRIPTION_NAME}
     resourceGroups:
       {TEST_RESOURCE_GROUP}:
         resources:
@@ -85,11 +81,10 @@ def test_update_subscription_from_remote():
     def mock_get_resources(credentials, subscription_id):
       return { TEST_RESOURCE_GROUP: [ resource] }
 
-    subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID, config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME })
+    subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID })
     subscription.update_from_remote(None, mock_get_resources)
     
     assert subscription.yaml_config == { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
-             config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME,
              config.YAML_RESOURCE_GROUP_LIST:
                 {
                   TEST_RESOURCE_GROUP:
@@ -114,9 +109,9 @@ def test_compare_subscription_with_1_remote_resource():
     def mock_get_resources(credentials, subscription_id):
       return { TEST_RESOURCE_GROUP: [ resource] }
 
-    subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID, config.YAML_SUBSCRIPTION_NAME: TEST_SUBSCRIPTION_NAME })
+    subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID })
     mock_click = MockClick()
     
     subscription.compare_with_remote(None, mock_click, mock_get_resources)
 
-    assert mock_click.get_content() == f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\tThere are differences. Local: 0, remote: 1"
+    assert mock_click.get_content() == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\tThere are differences. Local: 0, remote: 1"

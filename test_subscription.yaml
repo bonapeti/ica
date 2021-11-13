@@ -2,7 +2,6 @@
   tenantId: 900a843e-af52-4bc8-9009-4676366d9d97
   subscriptions:
   - id: 5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2
-    name: Pay-As-You-Go
     resourceGroups:
       NetworkWatcherRG:
         resources:

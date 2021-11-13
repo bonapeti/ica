@@ -5,7 +5,6 @@ from azure_api import get_resources
 AZURE="azure"
 YAML_TENANT_ID="tenantId"
 YAML_SUBSCRIPTION_ID="id"
-YAML_SUBSCRIPTION_NAME="name"
 YAML_SUBSCRIPTION_LIST="subscriptions"
 YAML_RESOURCES_LIST="resources"
 YAML_RESOURCE_GROUP_LIST="resourceGroups"
@@ -42,7 +41,6 @@ def new_azure_config(tenant_id, subscription_id, subscription_name):
   {YAML_TENANT_ID}: {tenant_id}
   subscriptions:
   - {YAML_SUBSCRIPTION_ID}: {subscription_id}
-    {YAML_SUBSCRIPTION_NAME}: {subscription_name}
 """
     return load_yaml(output_yaml)
 
@@ -100,12 +98,10 @@ class AzureTenant:
 class AzureSubscription:
 
     id = None
-    name = None
     yaml_config = None
 
     def __init__(self, yaml_subscription):
         self.id = yaml_subscription[YAML_SUBSCRIPTION_ID]
-        self.name = yaml_subscription[YAML_SUBSCRIPTION_NAME]
         self.yaml_config = yaml_subscription
 
     def add_resource_group(self, new_resource_group_name):
@@ -132,7 +128,7 @@ class AzureSubscription:
         for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
             remote_resource_group_count = remote_resource_group_count + 1
             remote_resource_count = remote_resource_count + len(remote_resource_list)
-        output.echo(f"Azure subscription '{self.name}'")
+        output.echo(f"Azure subscription '{self.id}'")
         (local_resource_group_count, local_resource_count) = self.__local_resources_count()
         if (remote_resource_group_count, remote_resource_count) == (local_resource_group_count, local_resource_count):
             output.echo("\tNo changes")
@@ -169,7 +165,7 @@ class AzureSubscription:
         return id
 
     def __str__(self):
-        return self.name if self.name else self.id
+        return self.id
 
 
 

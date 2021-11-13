@@ -1,6 +1,6 @@
 from iac import main, default_filename
 from config import AZURE
-from config_test import TEST_YAML, TEST_SUBSCRIPTION_ID, TEST_SUBSCRIPTION_NAME
+from config_test import TEST_YAML, TEST_SUBSCRIPTION_ID
 
 TEST_SUBSCRIPTION_ID="5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
 
@@ -18,7 +18,7 @@ def test_status_with_file(cli_runner):
     with cli_runner.isolated_filesystem():
       prepare_test_config_file()
       result = cli_runner.invoke(main, ["status"])
-      assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_NAME}'\n\tThere are differences. Local: 0, remote: 2\n"
+      assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\n\tThere are differences. Local: 0, remote: 2\n"
       assert result.exit_code == 0
 
 def test_describe(cli_runner):
