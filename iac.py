@@ -60,7 +60,7 @@ def pull(file):
 def describe(type, subscription_id):
     """Prints cloud infrastructure to stdout as YAML"""
 
-    logging.debug("Calling 'desribe' command")
+    logging.debug("Calling 'describe' command")
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
         credential = AzureCliCredential()
