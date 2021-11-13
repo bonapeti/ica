@@ -63,12 +63,12 @@ def describe(type, subscription_id):
     logging.debug("Calling 'describe' command")
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
+        yaml_config = new_azure_config(subscription_id)
+        
         with AzureCliCredential() as credential:
-            yaml_config = new_azure_config(subscription_id)
-
             yaml_config.azure.update_from_remote(credential)    
 
-            save_yaml(yaml_config.yaml_config, sys.stdout)
+        save_yaml(yaml_config.yaml_config, sys.stdout)
 
     except Exception as e:
         click.echo(str(e))
