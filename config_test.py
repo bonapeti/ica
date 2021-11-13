@@ -33,7 +33,7 @@ def test_save_azure_resources(cli_runner):
     yaml_config.subscriptions[0].add_resource_group(TEST_RESOURCE_GROUP)
     yaml_config.subscriptions[0].add_resource(TEST_RESOURCE_GROUP, {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
     with io.StringIO() as test_output:
-      config.save_yaml(yaml_config.yaml_config, test_output)
+      yaml_config.save_yaml(test_output)
       assert test_output.getvalue() == f"""\
 - cloud: azure
   subscriptions:

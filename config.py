@@ -41,6 +41,10 @@ class AzureConfig:
         for subscription in self.subscriptions:
             subscription.compare_with_remote(credential, output)
 
+    def save_yaml(self, ostream):
+        ruamel_yaml = YAML()
+        ruamel_yaml.dump(self.yaml_config, ostream)
+
 def new_azure_config(subscription_id):
     output_yaml=f"""\
 - cloud: {AZURE}
@@ -70,9 +74,7 @@ def load_yaml(source):
     
     return AzureConfig(yaml, list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_cloud[YAML_SUBSCRIPTION_LIST])))
 
-def save_yaml(yaml, ostream):
-    ruamel_yaml = YAML()
-    ruamel_yaml.dump(yaml, ostream)
+
 
 class AzureSubscription:
 

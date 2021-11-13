@@ -1,7 +1,6 @@
 import click
-from config import save_yaml, load_yaml, new_azure_config
+from config import load_yaml, new_azure_config
 from azure.identity import AzureCliCredential
-from azure.mgmt.resource.subscriptions import SubscriptionClient
 import sys
 import logging
 
@@ -47,7 +46,7 @@ def pull(file):
             with AzureCliCredential() as credential:
                 local_config.update_from_remote(credential) 
         
-            save_yaml(local_config.yaml_config, open(file,"w"))
+            local_config.save_yaml(open(file,"w"))
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -68,7 +67,7 @@ def describe(type, subscription_id):
         with AzureCliCredential() as credential:
             local_config.update_from_remote(credential)    
 
-        save_yaml(local_config.yaml_config, sys.stdout)
+        local_config.save_yaml(sys.stdout)
 
     except Exception as e:
         click.echo(str(e))
