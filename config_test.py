@@ -9,7 +9,6 @@ TEST_RESOURCE_GROUP = "test_resource_group"
 
 TEST_YAML=f"""\
 - cloud: azure
-  tenantId: {TENANT_ID}
   subscriptions:
   - id: {TEST_SUBSCRIPTION_ID}
 """
@@ -24,7 +23,6 @@ def test_load_azure_tenant(cli_runner):
     yaml_config = config.load_yaml(TEST_YAML)
     
     tenant = yaml_config.azure
-    assert tenant.id == TENANT_ID
     assert len(tenant.subscriptions) == 1
 
     subscription = tenant.subscriptions[0]
@@ -39,7 +37,6 @@ def test_save_azure_resources(cli_runner):
       config.save_yaml(yaml_config.yaml_config, test_output)
       assert test_output.getvalue() == f"""\
 - cloud: azure
-  tenantId: {TENANT_ID}
   subscriptions:
   - id: {TEST_SUBSCRIPTION_ID}
     resourceGroups:

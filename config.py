@@ -3,7 +3,6 @@ from ruamel.yaml import YAML
 from azure_api import get_resources
 
 AZURE="azure"
-YAML_TENANT_ID="tenantId"
 YAML_SUBSCRIPTION_ID="id"
 YAML_SUBSCRIPTION_LIST="subscriptions"
 YAML_RESOURCES_LIST="resources"
@@ -38,7 +37,6 @@ class Config:
 def new_azure_config(tenant_id, subscription_id, subscription_name):
     output_yaml=f"""\
 - cloud: {AZURE}
-  {YAML_TENANT_ID}: {tenant_id}
   subscriptions:
   - {YAML_SUBSCRIPTION_ID}: {subscription_id}
 """
@@ -61,8 +59,6 @@ def load_yaml(source):
     
     azure_tenant = azure_providers[0]
     
-    expect_string(azure_tenant,YAML_TENANT_ID, "Missing tenant ID!")
-
     assert azure_tenant[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
     
     azure_config = AzureTenant(azure_tenant)
@@ -74,12 +70,10 @@ def save_yaml(yaml_config, ostream):
 
 class AzureTenant:
 
-    id = None
     subscriptions = []
     yaml_config = None
 
     def __init__(self, azure_yaml):
-        self.id = azure_yaml[YAML_TENANT_ID]
         self.yaml_config = azure_yaml
         self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml[YAML_SUBSCRIPTION_LIST]))
 
@@ -90,10 +84,6 @@ class AzureTenant:
     def compare_with_remote(self, credential, output):
         for subscription in self.subscriptions:
             subscription.compare_with_remote(credential, output)
-
-
-    def __repr__(self):
-        return f"Azure(tenantId='{self.id}')"
 
 class AzureSubscription:
 
