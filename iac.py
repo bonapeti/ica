@@ -25,10 +25,10 @@ def status(file):
     logging.debug(f"Calling 'status' command with config file {file}")
     try:
         with open(file,"r") as stream:
-            yaml_config = load_yaml(stream)
+            local_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                yaml_config.compare_with_remote(credential, click) 
+                local_config.compare_with_remote(credential, click) 
             
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -42,12 +42,12 @@ def pull(file):
 
     try:
         with open(file,"r") as stream:
-            yaml_config = load_yaml(stream)
+            local_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                yaml_config.update_from_remote(credential) 
+                local_config.update_from_remote(credential) 
         
-            save_yaml(yaml_config.yaml_config, open(file,"w"))
+            save_yaml(local_config.yaml_config, open(file,"w"))
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -63,12 +63,12 @@ def describe(type, subscription_id):
     logging.debug("Calling 'describe' command")
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
-        yaml_config = new_azure_config(subscription_id)
+        local_config = new_azure_config(subscription_id)
         
         with AzureCliCredential() as credential:
-            yaml_config.update_from_remote(credential)    
+            local_config.update_from_remote(credential)    
 
-        save_yaml(yaml_config.yaml_config, sys.stdout)
+        save_yaml(local_config.yaml_config, sys.stdout)
 
     except Exception as e:
         click.echo(str(e))
