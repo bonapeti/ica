@@ -21,7 +21,7 @@ def expect_string(dict_var, name, error_message):
     assert type(value) == str
     return value
 
-class Config:
+class AzureConfig:
 
     yaml_config = None
     azure = None
@@ -57,12 +57,12 @@ def load_yaml(source):
     if len(azure_providers) > 1:
         raise ValueError("More than one Azure tenant defined, only one expected!")
     
-    azure_tenant = azure_providers[0]
+    azure_cloud = azure_providers[0]
     
-    assert azure_tenant[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
+    assert azure_cloud[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
     
-    azure_config = AzureTenant(azure_tenant)
-    return Config(yaml_config, azure_config)
+    azure_tenant = AzureTenant(azure_cloud)
+    return AzureConfig(yaml_config, azure_tenant)
 
 def save_yaml(yaml_config, ostream):
     yaml = YAML()
