@@ -50,14 +50,14 @@ def new_azure_config(subscription_id):
     return load_yaml(output_yaml)
 
 def load_yaml(source):
-    yaml = YAML()
-    yaml_config = yaml.load(source)
+    ruamel_yaml = YAML()
+    yaml = ruamel_yaml.load(source)
     
-    not_supported_providers = {provider.get("cloud","") for provider in yaml_config if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
+    not_supported_providers = {provider.get("cloud","") for provider in yaml if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
     for not_supported in not_supported_providers:
         print(f"Cloud provider '{not_supported}' is not supported")
 
-    azure_providers = [provider for provider in yaml_config if AZURE == provider.get("cloud","")]
+    azure_providers = [provider for provider in yaml if AZURE == provider.get("cloud","")]
     if len(azure_providers) == 0:
         raise ValueError("Missing Azure tenant")
 
@@ -68,11 +68,11 @@ def load_yaml(source):
     
     assert azure_cloud[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
     
-    return AzureConfig(yaml_config, list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_cloud[YAML_SUBSCRIPTION_LIST])))
+    return AzureConfig(yaml, list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_cloud[YAML_SUBSCRIPTION_LIST])))
 
-def save_yaml(yaml_config, ostream):
-    yaml = YAML()
-    yaml.dump(yaml_config, ostream)
+def save_yaml(yaml, ostream):
+    ruamel_yaml = YAML()
+    ruamel_yaml.dump(yaml, ostream)
 
 class AzureSubscription:
 
