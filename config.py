@@ -115,7 +115,6 @@ class AzureSubscription:
         self.yaml_config[YAML_RESOURCE_GROUP_LIST][new_resource_group_name]={ YAML_RESOURCES_LIST: [] }
 
     def add_resource(self, new_resource_group_name, new_resource):
-        self.add_resource_group(new_resource_group_name)
         self.yaml_config[YAML_RESOURCE_GROUP_LIST][new_resource_group_name][YAML_RESOURCES_LIST].append(new_resource)
 
     def update_from_remote(self, credentials, get_resources = get_resources):
@@ -124,7 +123,7 @@ class AzureSubscription:
             self.add_resource_group(remote_resource_group_name)
             for resource in remote_resource_list:
                 local_resource = self.__convert_resource_to_local(resource)
-                self.yaml_config[YAML_RESOURCE_GROUP_LIST][remote_resource_group_name][YAML_RESOURCES_LIST].append(local_resource)
+                self.add_resource(remote_resource_group_name, local_resource)
 
     def compare_with_remote(self, credentials, output, get_resources = get_resources):
 
