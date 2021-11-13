@@ -24,15 +24,22 @@ def expect_string(dict_var, name, error_message):
 class AzureConfig:
 
     yaml_config = None
-    azure = None
-    
+    subscriptions = []
 
-    def __init__(self, yaml_config, azure):
+    def __init__(self, yaml_config, subscriptions):
         self.yaml_config = yaml_config
-        self.azure = azure
+        self.subscriptions = subscriptions
 
     def __repr__(self):
         return f"Config('{self.azure}')"
+
+    def update_from_remote(self, credential):
+        for subscription in self.subscriptions:
+            subscription.update_from_remote(credential)
+
+    def compare_with_remote(self, credential, output):
+        for subscription in self.subscriptions:
+            subscription.compare_with_remote(credential, output)
 
 def new_azure_config(subscription_id):
     output_yaml=f"""\
@@ -61,29 +68,11 @@ def load_yaml(source):
     
     assert azure_cloud[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
     
-    azure_tenant = AzureTenant(azure_cloud)
-    return AzureConfig(yaml_config, azure_tenant)
+    return AzureConfig(yaml_config, list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_cloud[YAML_SUBSCRIPTION_LIST])))
 
 def save_yaml(yaml_config, ostream):
     yaml = YAML()
     yaml.dump(yaml_config, ostream)
-
-class AzureTenant:
-
-    subscriptions = []
-    yaml_config = None
-
-    def __init__(self, azure_yaml):
-        self.yaml_config = azure_yaml
-        self.subscriptions = list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_yaml[YAML_SUBSCRIPTION_LIST]))
-
-    def update_from_remote(self, credential):
-        for subscription in self.subscriptions:
-            subscription.update_from_remote(credential)
-
-    def compare_with_remote(self, credential, output):
-        for subscription in self.subscriptions:
-            subscription.compare_with_remote(credential, output)
 
 class AzureSubscription:
 

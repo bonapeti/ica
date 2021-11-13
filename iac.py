@@ -28,7 +28,7 @@ def status(file):
             yaml_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                yaml_config.azure.compare_with_remote(credential, click) 
+                yaml_config.compare_with_remote(credential, click) 
             
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
@@ -45,7 +45,7 @@ def pull(file):
             yaml_config = load_yaml(stream)
 
             with AzureCliCredential() as credential:
-                yaml_config.azure.update_from_remote(credential) 
+                yaml_config.update_from_remote(credential) 
         
             save_yaml(yaml_config.yaml_config, open(file,"w"))
 
@@ -66,7 +66,7 @@ def describe(type, subscription_id):
         yaml_config = new_azure_config(subscription_id)
         
         with AzureCliCredential() as credential:
-            yaml_config.azure.update_from_remote(credential)    
+            yaml_config.update_from_remote(credential)    
 
         save_yaml(yaml_config.yaml_config, sys.stdout)
 

@@ -22,17 +22,16 @@ def test_not_supported_provider(cli_runner):
 def test_load_azure_tenant(cli_runner):
     yaml_config = config.load_yaml(TEST_YAML)
     
-    tenant = yaml_config.azure
-    assert len(tenant.subscriptions) == 1
+    assert len(yaml_config.subscriptions) == 1
 
-    subscription = tenant.subscriptions[0]
+    subscription = yaml_config.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
     
 
 def test_save_azure_resources(cli_runner):
     yaml_config = config.load_yaml(TEST_YAML)
-    yaml_config.azure.subscriptions[0].add_resource_group(TEST_RESOURCE_GROUP)
-    yaml_config.azure.subscriptions[0].add_resource(TEST_RESOURCE_GROUP, {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
+    yaml_config.subscriptions[0].add_resource_group(TEST_RESOURCE_GROUP)
+    yaml_config.subscriptions[0].add_resource(TEST_RESOURCE_GROUP, {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
     with io.StringIO() as test_output:
       config.save_yaml(yaml_config.yaml_config, test_output)
       assert test_output.getvalue() == f"""\
