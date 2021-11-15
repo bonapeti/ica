@@ -23,15 +23,10 @@ def expect_string(dict_var, name, error_message):
 
 class AzureConfig:
 
-    yaml_config = None
     subscriptions = []
 
-    def __init__(self, yaml_config, subscriptions):
-        self.yaml_config = yaml_config
+    def __init__(self, subscriptions):
         self.subscriptions = subscriptions
-
-    def __repr__(self):
-        return f"Config('{self.azure}')"
 
     def update_from_remote(self, credential):
         for subscription in self.subscriptions:
@@ -41,9 +36,9 @@ class AzureConfig:
         for subscription in self.subscriptions:
             subscription.compare_with_remote(credential, output)
 
-    def save_yaml(self, ostream):
-        ruamel_yaml = YAML()
-        ruamel_yaml.dump(self.yaml_config, ostream)
+def save_yaml(yaml, ostream):
+    ruamel_yaml = YAML()
+    ruamel_yaml.dump(yaml, ostream)
 
 def new_azure_config(subscription_id):
     output_yaml=f"""\
@@ -115,6 +110,9 @@ class AzureSubscription:
             output.echo("\tNo changes")
         else:
             output.echo(f"\tThere are differences. Local: {local_resource_count}, remote: {remote_resource_count}")
+
+    def as_yaml(self):
+        return []
 
     def __convert_resource_to_local(self, resource):
         local_resource = { YAML_AZURE_RESOURCE_NAME: resource.name, YAML_AZURE_RESOURCE_TYPE: resource.type }

@@ -19,21 +19,21 @@ def test_not_supported_provider(cli_runner):
 - cloud: unknown_cloud
 """)
 
-def test_load_azure_tenant(cli_runner):
-    yaml_config = config.load_yaml(TEST_YAML)
+def test_load_azure_subscription_from_valid_yaml(cli_runner):
+    azure_config = config.load_yaml(TEST_YAML)
     
-    assert len(yaml_config.subscriptions) == 1
+    assert len(azure_config.subscriptions) == 1
 
-    subscription = yaml_config.subscriptions[0]
+    subscription = azure_config.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
     
 
 def test_save_azure_resources(cli_runner):
-    yaml_config = config.load_yaml(TEST_YAML)
-    yaml_config.subscriptions[0].add_resource_group(TEST_RESOURCE_GROUP)
-    yaml_config.subscriptions[0].add_resource(TEST_RESOURCE_GROUP, {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
+    azure_config = config.load_yaml(TEST_YAML)
+    azure_config.subscriptions[0].add_resource_group(TEST_RESOURCE_GROUP)
+    azure_config.subscriptions[0].add_resource(TEST_RESOURCE_GROUP, {config.YAML_AZURE_RESOURCE_NAME: "boo", config.YAML_AZURE_RESOURCE_TYPE: "baa" })
     with io.StringIO() as test_output:
-      yaml_config.save_yaml(test_output)
+      config.save_yaml(azure_config.yaml_config, test_output)
       assert test_output.getvalue() == f"""\
 - cloud: azure
   subscriptions:
