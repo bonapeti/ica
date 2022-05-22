@@ -2,7 +2,7 @@
   subscriptions:
   - id: 5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2
     resourceGroups:
-      NetworkWatcherRG:
+    - NetworkWatcherRG:
         resources:
         - name: NetworkWatcher_centralus
           type: Microsoft.Network/networkWatchers
@@ -10,5 +10,5 @@
         - name: NetworkWatcher_northeurope
           type: Microsoft.Network/networkWatchers
           location: northeurope
-      azure_devops_resources:
+    - azure_devops_resources:
         resources: []
