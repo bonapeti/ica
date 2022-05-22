@@ -61,7 +61,7 @@ def load_yaml(source):
     
     not_supported_providers = {provider.get("cloud","") for provider in yaml if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
     for not_supported in not_supported_providers:
-        print(f"Cloud provider '{not_supported}' is not supported")
+        logging.warning(f"Cloud provider '{not_supported}' is not supported")
 
     azure_providers = [provider for provider in yaml if AZURE == provider.get("cloud","")]
     if len(azure_providers) == 0:
