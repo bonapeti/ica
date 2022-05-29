@@ -89,7 +89,7 @@ class ResourceGroup:
         self.resources[azure_resource.name] = Resource(azure_resource)
 
     def as_yaml(self):
-        return { self.name: { YAML_RESOURCES_LIST: [ resource.as_yaml() for name, resource in self.resources.items()]}}
+        return { YAML_RESOURCES_LIST: [ resource.as_yaml() for name, resource in self.resources.items()]}
 
     def resource_count(self):
         return len(self.resources)
@@ -132,7 +132,7 @@ class AzureSubscription:
 
     def as_yaml(self):
         return {YAML_SUBSCRIPTION_ID: self.id,
-                YAML_RESOURCE_GROUP_LIST : [ resource_group.as_yaml() for resource_group_name, resource_group in self.resource_groups.items()]}
+                YAML_RESOURCE_GROUP_LIST :  { resource_group_name: resource_group.as_yaml() for resource_group_name, resource_group in self.resource_groups.items() }}
 
     def add_resource_group(self, new_resource_group_name):
         self.resource_groups[new_resource_group_name] = ResourceGroup(new_resource_group_name)

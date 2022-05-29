@@ -38,7 +38,7 @@ def test_empty_subscription_as_yaml(cli_runner):
     subscription = config.AzureSubscription({config.YAML_SUBSCRIPTION_ID: "id"})
     result = subscription.as_yaml()
     assert { config.YAML_SUBSCRIPTION_ID: "id",
-               config.YAML_RESOURCE_GROUP_LIST: []} == result
+               config.YAML_RESOURCE_GROUP_LIST: {}} == result
 
 
 
@@ -75,21 +75,19 @@ def test_azure_resource_as_yaml(cli_runner):
 
 def test_empty_azure_resource_group_as_yaml(cli_runner):
    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
-   assert azure_resource_group.as_yaml() == {
-                        TEST_RESOURCE_GROUP: { config.YAML_RESOURCES_LIST:[] }}
+   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES_LIST:[] }
 
 def test_azure_resource_group_with_resource_as_yaml(cli_runner):
    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
    azure_resource_group.add_resource(MockAzureResource())
-   assert azure_resource_group.as_yaml() == {
-                        TEST_RESOURCE_GROUP: { config.YAML_RESOURCES_LIST: [
+   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES_LIST: [
                           {
                             config.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
                             config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name,
                             config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
                             config.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags 
                             }
-                        ]} }
+                        ]}
 
 
 def test_update_subscription_from_remote():
