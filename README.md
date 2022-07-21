@@ -7,19 +7,35 @@ Terraform is more complicated than necessary.
 You download and you can start importing, modifyig cloud infrastructure code.
 
 # Status
-Just playing with the code, far from being anything useful.
+Not that useful yet.
+
 
 # Examples
 
+## Dumping Azure config to stdout
+```
+python iac.py describe -t azure -s "5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
+- cloud: azure
+  subscriptions:
+  - id: 5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2
+    resourceGroups:
+      NetworkWatcherRG:
+        resources:
+        - name: NetworkWatcher_centralus
+          type: Microsoft.Network/networkWatchers
+          location: centralus
+        - name: NetworkWatcher_northeurope
+          type: Microsoft.Network/networkWatchers
+          location: northeurope
+      azure_devops_resources:
+        resources: []
+```
 
 ** iac.oy
 *** status
     local_config = config.load_yaml from file
     local_config.compare_with_remote
-*** describe
-    local_config = new_azure_config(subscription_id)
-    local_config.update_from_remote(credential)    
-    config.save_yaml(local_config.as_yaml(), sys.stdout)
+
 *** pull
     local_config = config.load_yaml from file
     local_config.update_from_remote(credential) 
