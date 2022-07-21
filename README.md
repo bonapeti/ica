@@ -11,7 +11,7 @@ Not that useful yet.
 
 # Examples
 
-## Dumping Azure config to stdout
+## Dumps current status from actual infrastructure to stdout
 ```
 λ python iac.py describe -t azure -s "5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
 - cloud: azure
@@ -30,14 +30,14 @@ Not that useful yet.
         resources: []
 ```
 
-## Compare the actual remote infrastrcture and the local discription in file
+## Compares current status from actual infrastructure and the description in file
 ```
 λ python iac.py status -f test_subscription.yaml
 Azure subscription '5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2'
         There are differences. Local: 2, remote: 2
 ```
 
-## Pull changes from remote infrastructure and update local file
+## Pulls current status from actual infrastructure and updates file
 ```
 λ python iac.py pull -f test_subscription.yaml
 ```
