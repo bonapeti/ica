@@ -18,10 +18,10 @@ def main(debug):
 
 @main.command()
 @click.option("-f","--file", default=default_filename, show_default=True, help=CONFIG_FILE_HELP)
-def status(file):
+def diff(file):
     """Shows differences between local and cloud infrastructure"""
 
-    logging.debug(f"Calling 'status' command with config file {file}")
+    logging.debug(f"Calling 'diff' command with config file {file}")
     try:
         with open(file,"r") as stream:
             local_config = load_yaml(stream)
@@ -56,10 +56,10 @@ def pull(file):
 @main.command()
 @click.option("-t","--type", required=True, type=click.Choice(['azure']), help="One of supported cloud provider: 'azure'")
 @click.option("-s","--subscription_id", required=True, help="Subscription ID")
-def describe(type, subscription_id):
+def show(type, subscription_id):
     """Prints cloud infrastructure to stdout as YAML"""
 
-    logging.debug("Calling 'describe' command")
+    logging.debug("Calling 'show' command")
     assert type == 'azure', "The supported cloud providers are: ['azure']"
     try:
         local_config = new_azure_config(subscription_id)

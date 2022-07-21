@@ -13,7 +13,7 @@ Not that useful yet.
 
 ## Dumps current status from actual infrastructure to stdout
 ```
-λ python iac.py describe --type azure --subscription_id "5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
+λ python iac.py show --type azure --subscription_id "5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
 - cloud: azure
   subscriptions:
   - id: 5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2
@@ -32,7 +32,7 @@ Not that useful yet.
 
 ## Compares current status from actual infrastructure and the description in file
 ```
-λ python iac.py status --file test_subscription.yaml
+λ python iac.py diff --file test_subscription.yaml
 Azure subscription '5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2'
         There are differences. Local: 2, remote: 2
 ```

@@ -8,22 +8,22 @@ def prepare_test_config_file():
     with open(default_filename, 'w') as f:
           f.write(TEST_YAML)
 
-def test_status_without_file(cli_runner):
-    result = cli_runner.invoke(main, ["status"])
+def test_diff_without_file(cli_runner):
+    result = cli_runner.invoke(main, ["diff"])
     assert result.output == f"Cannot find {default_filename}\n"
     assert result.exit_code == 0
 
-def test_status_with_file(cli_runner):
+def test_diff_with_file(cli_runner):
 
     with cli_runner.isolated_filesystem():
       prepare_test_config_file()
-      result = cli_runner.invoke(main, ["status"])
+      result = cli_runner.invoke(main, ["diff"])
       assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\n\tThere are differences. Local: 1, remote: 2\n"
       assert result.exit_code == 0
 
-def test_describe(cli_runner):
+def test_show(cli_runner):
     
-    result = cli_runner.invoke(main, ["describe","-t",AZURE,"-s",TEST_SUBSCRIPTION_ID])
+    result = cli_runner.invoke(main, ["show","-t",AZURE,"-s",TEST_SUBSCRIPTION_ID])
     with open("./test_subscription.yaml","r") as expected_file:
       assert result.output == expected_file.read()
     assert result.exit_code == 0
