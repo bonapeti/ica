@@ -12,6 +12,10 @@ TEST_YAML=f"""\
 - cloud: azure
   subscriptions:
   - id: {TEST_SUBSCRIPTION_ID}
+    resourceGroups:
+      NetworkWatcherRG:
+        resources:
+        - name: NetworkWatcher_centralus
 """
 
 def test_not_supported_provider(cli_runner):
@@ -28,6 +32,12 @@ def test_load_azure_subscription_from_valid_yaml(cli_runner):
     subscription = azure_config.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
      
+def test_load_resource_groups_from_valid_yaml(cli_runner):
+    azure_config = config.load_yaml(TEST_YAML)
+
+    subscription = azure_config.subscriptions[0]
+    assert len(subscription.resource_groups) == 1, "Should have at least 1 resource group loaded"
+
 
 def test_azure_config_as_yaml(cli_runner):
     azure_config = config.AzureConfig([])

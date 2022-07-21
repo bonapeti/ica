@@ -74,7 +74,20 @@ def load_yaml(source):
     
     assert azure_cloud[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
     
-    return AzureConfig(list(map(lambda subscription_yaml: AzureSubscription(subscription_yaml), azure_cloud[YAML_SUBSCRIPTION_LIST])))
+    return AzureConfig(list(map(load_subscription, azure_cloud[YAML_SUBSCRIPTION_LIST])))
+
+def load_subscription(subscription_yaml):
+
+    azure_subscription = AzureSubscription(subscription_yaml)
+
+    if YAML_RESOURCE_GROUP_LIST in subscription_yaml:
+        resource_groups_yaml = subscription_yaml[YAML_RESOURCE_GROUP_LIST]
+        assert isinstance(resource_groups_yaml, dict), "Expecting dict of resource groups yaml definitions"
+
+        for name, resource_group_dict in resource_groups_yaml.items():
+            azure_subscription.add_resource_group(name)
+
+    return azure_subscription
 
 class ResourceGroup:
 
