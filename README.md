@@ -37,9 +37,8 @@ Azure subscription '5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2'
         There are differences. Local: 2, remote: 2
 ```
 
+## Pull changes from remote infrastructure and update local file
+```
+λ python iac.py pull -f test_subscription.yaml
+```
 
-
-*** pull
-    local_config = config.load_yaml from file
-    local_config.update_from_remote(credential) 
-    config.save_yaml(local.as_yaml(), file)
