@@ -1,14 +1,16 @@
-from iac import pull, status
-
+# What is this?
 
 I am playing with an idea of a command-line tool which would help managing cloud infrastructure better than Terraform does.
 Terraform is more complicated than necessary.
 
-How does it work?
+# How does it work?
 You download and you can start importing, modifyig cloud infrastructure code.
 
-Status
+# Status
 Just playing with the code, far from being anything useful.
+
+# Examples
+
 
 ** iac.oy
 *** status
