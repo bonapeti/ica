@@ -71,6 +71,7 @@ class MockClick:
 
   def echo(self, message):
     self.test_output.write(message)
+    self.test_output.write("\n")
 
   def get_content(self):
     return self.test_output.getvalue()
@@ -145,4 +146,4 @@ def test_compare_subscription_with_1_remote_resource():
     
     subscription.compare_with_remote(None, mock_click, mock_get_resources)
 
-    assert mock_click.get_content() == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\tThere are differences. Local: 0, remote: 1"
+    assert mock_click.get_content().startswith(f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nThere are differences")
