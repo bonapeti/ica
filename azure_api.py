@@ -5,7 +5,7 @@ MISSING_SUBSCRIPTION_ID = "Missing subscription ID"
 GET_RESOURCES_EXPAND="createdTime,changedTime,provisioningState"
 
 @timeit
-def get_resources(credentials, subscription_id):
+def get_resources(credentials, subscription_id) -> dict:
     
     assert subscription_id, MISSING_SUBSCRIPTION_ID
     
