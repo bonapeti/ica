@@ -106,9 +106,6 @@ class ResourceGroup:
     def as_yaml(self):
         return { YAML_RESOURCES: { name: resource_as_yaml(resource) for name, resource in self.resources.items()} }
 
-    def resource_count(self) -> int:
-        return len(self.resources)
-
     def __str__(self):
         return self.name
 
@@ -171,7 +168,6 @@ class AzureSubscription:
             remote_resource_group_count = remote_resource_group_count + 1
             remote_resource_count = remote_resource_count + len(remote_resource_list)
         output.echo(f"Azure subscription '{self.id}'")
-        (local_resource_group_count, local_resource_count) = self.__local_resources_count()
 
         local_keys = self.resource_groups.keys()
         remote_keys = remote_resources.keys()
@@ -197,16 +193,7 @@ class AzureSubscription:
             print(tabulate(diff_list, headers=["Only local", "Common", "Only remote"]))
         else:
             output.echo("No changes")
-            
-
-    def __local_resources_count(self):
-        """Returns the number of resource groups and resources in local config file as tuple"""
-
-        local_resource_count = 0
-        for resource_group_name, resource_group in self.resource_groups.items():
-            local_resource_count = local_resource_count +resource_group.resource_count()
-        return len(self.resource_groups), local_resource_count
-
+        
 
     def __repr__(self):
         return id

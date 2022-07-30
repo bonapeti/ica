@@ -47,7 +47,7 @@ def test_load_resources_from_valid_yaml(cli_runner):
     azure_config = config.load_yaml(TEST_YAML)
 
     subscription = azure_config.subscriptions[0]
-    assert subscription.resource_groups["NetworkWatcherRG"].resource_count() == 2, "Should have at least 2 resource loaded"
+    assert len(subscription.resource_groups["NetworkWatcherRG"].resources) == 2, "Should have at least 2 resource loaded"
 
 def test_azure_config_as_yaml(cli_runner):
     azure_config = config.AzureConfig([])
