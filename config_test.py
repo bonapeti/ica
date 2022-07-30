@@ -15,7 +15,8 @@ TEST_YAML=f"""\
     resourceGroups:
       NetworkWatcherRG:
         resources:
-        - name: NetworkWatcher_centralus
+          NetworkWatcher_centralus:
+            - type: resource_type
 """
 
 def test_not_supported_provider(cli_runner):
@@ -38,6 +39,11 @@ def test_load_resource_groups_from_valid_yaml(cli_runner):
     subscription = azure_config.subscriptions[0]
     assert len(subscription.resource_groups) == 1, "Should have at least 1 resource group loaded"
 
+def test_load_resources_from_valid_yaml(cli_runner):
+    azure_config = config.load_yaml(TEST_YAML)
+
+    subscription = azure_config.subscriptions[0]
+    assert subscription.resource_groups["NetworkWatcherRG"].resource_count() == 1, "Should have at least 1 resource loaded"
 
 def test_azure_config_as_yaml(cli_runner):
     azure_config = config.AzureConfig([])
@@ -48,7 +54,7 @@ def test_empty_subscription_as_yaml(cli_runner):
     subscription = config.AzureSubscription({config.YAML_SUBSCRIPTION_ID: "id"})
     result = subscription.as_yaml()
     assert { config.YAML_SUBSCRIPTION_ID: "id",
-               config.YAML_RESOURCE_GROUP_LIST: {}} == result
+               config.YAML_RESOURCE_GROUPS: {}} == result
 
 
 
@@ -60,8 +66,11 @@ class MockAzureResource:
     kind = None
     identity = None
     managed_by = None
-   
     resource_group_name = TEST_RESOURCE_GROUP
+    yaml = "MockResourceYaml"
+
+    def as_yaml(self):
+      return self.yaml
 
 class MockAzureResourceGroup:
   name = TEST_RESOURCE_GROUP
@@ -80,25 +89,20 @@ def test_azure_resource_as_yaml(cli_runner):
    azure_resource = config.Resource(MockAzureResource())
    assert azure_resource.as_yaml() == {
                         config.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
-                        config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name,
                         config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
                         config.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }
 
 def test_empty_azure_resource_group_as_yaml(cli_runner):
    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
-   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES_LIST:[] }
+   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES: {} }
 
 def test_azure_resource_group_with_resource_as_yaml(cli_runner):
    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
-   azure_resource_group.add_resource(MockAzureResource())
-   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES_LIST: [
-                          {
-                            config.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
-                            config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name,
-                            config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
-                            config.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags 
-                            }
-                        ]}
+   resource = MockAzureResource()
+   azure_resource_group.add_resource(resource)
+   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES: {
+                                                MockAzureResource.name: config.resource_as_yaml(resource)
+                                            }}
 
 
 def test_update_subscription_from_remote():
@@ -112,24 +116,17 @@ def test_update_subscription_from_remote():
     subscription.update_from_remote(None, mock_get_resources)
     
     assert subscription.as_yaml() == { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
-             config.YAML_RESOURCE_GROUP_LIST:
+             config.YAML_RESOURCE_GROUPS:
                 {
                   TEST_RESOURCE_GROUP:
                   {
-                    config.YAML_RESOURCES_LIST: 
-                    [ 
-                        { 
-                          config.YAML_AZURE_RESOURCE_NAME: MockAzureResource.name, 
-                          config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
-                          config.YAML_AZURE_RESOURCE_LOCATION: MockAzureResource.location,
-                          config.YAML_AZURE_RESOURCE_TAGS:  MockAzureResource.tags
-                        }
-                    ]
+                    config.YAML_RESOURCES: 
+                    { MockAzureResource.name: config.resource_as_yaml(resource) }
                   }, 
                   ANOTHER_RESOURCE_GROUP:
                   {
-                    config.YAML_RESOURCES_LIST: 
-                    []
+                    config.YAML_RESOURCES: 
+                    {}
                   }
                 }
             }

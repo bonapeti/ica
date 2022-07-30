@@ -5,8 +5,8 @@ from azure_api import get_resources
 AZURE="azure"
 YAML_SUBSCRIPTION_ID="id"
 YAML_SUBSCRIPTION_LIST="subscriptions"
-YAML_RESOURCES_LIST="resources"
-YAML_RESOURCE_GROUP_LIST="resourceGroups"
+YAML_RESOURCES="resources"
+YAML_RESOURCE_GROUPS="resourceGroups"
 YAML_AZURE_RESOURCE_NAME="name"
 YAML_AZURE_RESOURCE_TYPE="type"
 YAML_AZURE_RESOURCE_LOCATION="location"
@@ -76,6 +76,21 @@ def load_yaml(source) -> AzureConfig:
     
     return AzureConfig(list(map(load_subscription, azure_cloud[YAML_SUBSCRIPTION_LIST])))
 
+def load_resource_group(name, resource_group_yaml):
+    resource_group = ResourceGroup(name)
+
+    if YAML_RESOURCES in resource_group_yaml:
+        resources_yaml = resource_group_yaml[YAML_RESOURCES]
+        assert isinstance(resources_yaml, dict), "Expecting dict of resources yaml definitions"
+        for name, resource_yaml in resources_yaml.items():
+            resource_group.add_resource(load_resource(name, resource_yaml))
+
+
+    return resource_group
+
+def load_resource(name, resource_yaml):
+    return Resource(name)
+
 class ResourceGroup:
 
     name = None
@@ -86,10 +101,10 @@ class ResourceGroup:
         self.resources = {}
 
     def add_resource(self, azure_resource):
-        self.resources[azure_resource.name] = Resource(azure_resource)
+        self.resources[azure_resource.name] = azure_resource
 
-    def as_yaml(self) -> dict:
-        return { YAML_RESOURCES_LIST: [ resource.as_yaml() for name, resource in self.resources.items()]}
+    def as_yaml(self):
+        return { YAML_RESOURCES: { name: resource_as_yaml(resource) for name, resource in self.resources.items()} }
 
     def resource_count(self) -> int:
         return len(self.resources)
@@ -99,27 +114,29 @@ class ResourceGroup:
 
 class Resource:
 
+    name = None
     azure_resource = None
 
     def __init__(self, azure_resource):
         self.azure_resource = azure_resource
 
-    def as_yaml(self) -> dict:
-        local_resource = { 
-            YAML_AZURE_RESOURCE_NAME: self.azure_resource.name, 
-            YAML_AZURE_RESOURCE_TYPE: self.azure_resource.type }
-        local_resource["location"] = self.azure_resource.location
-        if self.azure_resource.kind:
-            local_resource["kind"] = self.azure_resource.kind
-        if self.azure_resource.managed_by:
-            local_resource["managed_by"] = self.azure_resource.managed_by
-        if self.azure_resource.tags:
-            local_resource["tags"] = self.azure_resource.tags
-        return local_resource
+    def as_yaml(self):
+        return resource_as_yaml(self.azure_resource)
     
 
     def __str__(self):
         return self.name
+
+def resource_as_yaml(azure_resource) -> dict:
+    local_resource = { YAML_AZURE_RESOURCE_TYPE: azure_resource.type }
+    local_resource["location"] = azure_resource.location
+    if azure_resource.kind:
+        local_resource["kind"] = azure_resource.kind
+    if azure_resource.managed_by:
+        local_resource["managed_by"] = azure_resource.managed_by
+    if azure_resource.tags:
+        local_resource["tags"] = azure_resource.tags
+    return local_resource
 
 class AzureSubscription:
 
@@ -132,17 +149,18 @@ class AzureSubscription:
 
     def as_yaml(self) -> dict:
         return {YAML_SUBSCRIPTION_ID: self.id,
-                YAML_RESOURCE_GROUP_LIST :  { resource_group_name: resource_group.as_yaml() for resource_group_name, resource_group in self.resource_groups.items() }}
+                YAML_RESOURCE_GROUPS :  { resource_group_name: resource_group.as_yaml() for resource_group_name, resource_group in self.resource_groups.items() }}
 
-    def add_resource_group(self, new_resource_group_name):
-        self.resource_groups[new_resource_group_name] = ResourceGroup(new_resource_group_name)
+    def add_resource_group(self, resource_group):
+        self.resource_groups[resource_group.name] = resource_group
             
     def update_from_remote(self, credentials, get_resources = get_resources) -> None:
 
         for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
-            self.add_resource_group(remote_resource_group_name)
+            resource_group = ResourceGroup(remote_resource_group_name)
+            self.add_resource_group(resource_group)
             for resource in remote_resource_list:
-                self.resource_groups[remote_resource_group_name].add_resource(resource)
+                resource_group.add_resource(resource)
 
     def compare_with_remote(self, credentials, output, get_resources = get_resources):
 
@@ -178,12 +196,12 @@ def load_subscription(subscription_yaml) -> AzureSubscription:
 
     azure_subscription = AzureSubscription(subscription_yaml)
 
-    if YAML_RESOURCE_GROUP_LIST in subscription_yaml:
-        resource_groups_yaml = subscription_yaml[YAML_RESOURCE_GROUP_LIST]
+    if YAML_RESOURCE_GROUPS in subscription_yaml:
+        resource_groups_yaml = subscription_yaml[YAML_RESOURCE_GROUPS]
         assert isinstance(resource_groups_yaml, dict), "Expecting dict of resource groups yaml definitions"
 
-        for name, resource_group_dict in resource_groups_yaml.items():
-            azure_subscription.add_resource_group(name)
+        for name, resource_group_yaml in resource_groups_yaml.items():
+            azure_subscription.add_resource_group(load_resource_group(name, resource_group_yaml))
 
     return azure_subscription
 

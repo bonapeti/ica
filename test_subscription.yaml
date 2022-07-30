@@ -4,11 +4,11 @@
     resourceGroups:
       NetworkWatcherRG:
         resources:
-        - name: NetworkWatcher_centralus
-          type: Microsoft.Network/networkWatchers
-          location: centralus
-        - name: NetworkWatcher_northeurope
-          type: Microsoft.Network/networkWatchers
-          location: northeurope
+          NetworkWatcher_centralus:
+            type: Microsoft.Network/networkWatchers
+            location: centralus
+          NetworkWatcher_northeurope:
+            type: Microsoft.Network/networkWatchers
+            location: northeurope
       azure_devops_resources:
-        resources: []
+        resources: {}
