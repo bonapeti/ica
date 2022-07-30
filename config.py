@@ -1,6 +1,7 @@
 import logging
 from ruamel.yaml import YAML
 from azure_api import get_resources
+from tabulate import tabulate
 
 AZURE="azure"
 YAML_SUBSCRIPTION_ID="id"
@@ -119,10 +120,6 @@ class Resource:
     def __init__(self, name, azure_resource):
         self.name = name
         self.azure_resource = azure_resource
-
-    def as_yaml(self):
-        return resource_as_yaml(self.azure_resource)
-    
 
     def __str__(self):
         return self.name

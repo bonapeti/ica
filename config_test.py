@@ -88,8 +88,8 @@ class MockClick:
     return self.test_output.getvalue()
 
 def test_azure_resource_as_yaml(cli_runner):
-   azure_resource = config.Resource(MockAzureResource.name, MockAzureResource())
-   assert azure_resource.as_yaml() == {
+   azure_resource = MockAzureResource()
+   assert config.resource_as_yaml(azure_resource) == {
                         config.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
                         config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
                         config.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }
