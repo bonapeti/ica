@@ -19,6 +19,8 @@ TEST_YAML=f"""\
             - type: resource_type
           NetworkWatcher_northeurope:
             - type: resource_type
+      azure_devops_resources:
+        resources: {{}}
 """
 
 def test_not_supported_provider(cli_runner):
@@ -39,7 +41,7 @@ def test_load_resource_groups_from_valid_yaml(cli_runner):
     azure_config = config.load_yaml(TEST_YAML)
 
     subscription = azure_config.subscriptions[0]
-    assert len(subscription.resource_groups) == 1, "Should have at least 1 resource group loaded"
+    assert len(subscription.resource_groups) == 2, "Should have at least 2 resource group loaded"
 
 def test_load_resources_from_valid_yaml(cli_runner):
     azure_config = config.load_yaml(TEST_YAML)

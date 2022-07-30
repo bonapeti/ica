@@ -166,15 +166,38 @@ class AzureSubscription:
 
         remote_resource_group_count = 0
         remote_resource_count = 0
-        for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
+        remote_resources = get_resources(credentials, self.id)
+        for remote_resource_group_name, remote_resource_list in remote_resources.items():
             remote_resource_group_count = remote_resource_group_count + 1
             remote_resource_count = remote_resource_count + len(remote_resource_list)
         output.echo(f"Azure subscription '{self.id}'")
         (local_resource_group_count, local_resource_count) = self.__local_resources_count()
-        if (remote_resource_group_count, remote_resource_count) == (local_resource_group_count, local_resource_count):
-            output.echo("No changes")
+
+        local_keys = self.resource_groups.keys()
+        remote_keys = remote_resources.keys()
+        common = local_keys & remote_keys
+        only_local = local_keys ^ common
+        
+        only_remote = remote_keys ^ common
+
+        diff_list = []
+        for only_local_resource_group in only_local:
+            diff_list.append([ only_local_resource_group, "", ""])
+        
+        for common_resource_group in common:
+            diff_list.append([ "", common_resource_group, ""])
+
+        for only_remote_resource_group in only_remote:
+            diff_list.append([ "", "", only_remote_resource_group])
+
+        
+
+        if only_local or only_remote:
+            output.echo(f"There are differences:\n")
+            print(tabulate(diff_list, headers=["Only local", "Common", "Only remote"]))
         else:
-            output.echo(f"There are differences:\n\tResource groups:\t Local: {local_resource_group_count}\tRemote: {remote_resource_count}\n\tResources:\t\t Local: {local_resource_count}\tRemote: {remote_resource_count}")
+            output.echo("No changes")
+            
 
     def __local_resources_count(self):
         """Returns the number of resource groups and resources in local config file as tuple"""
