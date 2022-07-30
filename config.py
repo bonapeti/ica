@@ -88,8 +88,7 @@ def load_resource_group(name, resource_group_yaml):
 
     return resource_group
 
-def load_resource(name, resource_yaml):
-    return Resource(name)
+
 
 class ResourceGroup:
 
@@ -117,7 +116,8 @@ class Resource:
     name = None
     azure_resource = None
 
-    def __init__(self, azure_resource):
+    def __init__(self, name, azure_resource):
+        self.name = name
         self.azure_resource = azure_resource
 
     def as_yaml(self):
@@ -126,6 +126,9 @@ class Resource:
 
     def __str__(self):
         return self.name
+
+def load_resource(name, resource_yaml) -> Resource:
+    return Resource(name, resource_yaml)
 
 def resource_as_yaml(azure_resource) -> dict:
     local_resource = { YAML_AZURE_RESOURCE_TYPE: azure_resource.type }

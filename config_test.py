@@ -17,6 +17,8 @@ TEST_YAML=f"""\
         resources:
           NetworkWatcher_centralus:
             - type: resource_type
+          NetworkWatcher_northeurope:
+            - type: resource_type
 """
 
 def test_not_supported_provider(cli_runner):
@@ -43,7 +45,7 @@ def test_load_resources_from_valid_yaml(cli_runner):
     azure_config = config.load_yaml(TEST_YAML)
 
     subscription = azure_config.subscriptions[0]
-    assert subscription.resource_groups["NetworkWatcherRG"].resource_count() == 1, "Should have at least 1 resource loaded"
+    assert subscription.resource_groups["NetworkWatcherRG"].resource_count() == 2, "Should have at least 2 resource loaded"
 
 def test_azure_config_as_yaml(cli_runner):
     azure_config = config.AzureConfig([])
@@ -86,7 +88,7 @@ class MockClick:
     return self.test_output.getvalue()
 
 def test_azure_resource_as_yaml(cli_runner):
-   azure_resource = config.Resource(MockAzureResource())
+   azure_resource = config.Resource(MockAzureResource.name, MockAzureResource())
    assert azure_resource.as_yaml() == {
                         config.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
                         config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
