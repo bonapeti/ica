@@ -37,7 +37,7 @@ class AzureConfig:
         for subscription in self.subscriptions:
             subscription.compare_with_remote(credential, output)
 
-    def as_yaml(self) -> list[dict]:
+    def as_yaml(self):
         return [ {
                     "cloud": AZURE, 
                     YAML_SUBSCRIPTION_LIST: [ subscription.as_yaml() for subscription in self.subscriptions] 
