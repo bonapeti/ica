@@ -161,12 +161,7 @@ class AzureSubscription:
 
     def compare_with_remote(self, credentials, output, get_resources = get_resources):
 
-        remote_resource_group_count = 0
-        remote_resource_count = 0
         remote_resources = get_resources(credentials, self.id)
-        for remote_resource_group_name, remote_resource_list in remote_resources.items():
-            remote_resource_group_count = remote_resource_group_count + 1
-            remote_resource_count = remote_resource_count + len(remote_resource_list)
         output.echo(f"Azure subscription '{self.id}'")
 
         local_keys = self.resource_groups.keys()
