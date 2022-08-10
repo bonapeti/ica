@@ -1,6 +1,6 @@
-import config 
 import io
 import pytest
+import config
 
 TENANT_ID="900a843e-af52-4bc8-9009-4676366d9d97"
 TEST_SUBSCRIPTION_ID="5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
@@ -25,18 +25,18 @@ TEST_YAML=f"""\
 
 def test_not_supported_provider(cli_runner):
     with pytest.raises(ValueError):
-        config.load_yaml(f"""\
+        config.load_yaml("""\
 - cloud: unknown_cloud
 """)
 
 def test_load_azure_subscription_from_valid_yaml(cli_runner):
     azure_config = config.load_yaml(TEST_YAML)
-    
+
     assert len(azure_config.subscriptions) == 1
 
     subscription = azure_config.subscriptions[0]
     assert subscription.id == TEST_SUBSCRIPTION_ID
-     
+
 def test_load_resource_groups_from_valid_yaml(cli_runner):
     azure_config = config.load_yaml(TEST_YAML)
 
@@ -74,37 +74,37 @@ class MockAzureResource:
     yaml = "MockResourceYaml"
 
     def as_yaml(self):
-      return self.yaml
+        return self.yaml
 
 class MockAzureResourceGroup:
-  name = TEST_RESOURCE_GROUP
+    name = TEST_RESOURCE_GROUP
 
 class MockClick:
-  test_output = io.StringIO()
+    test_output = io.StringIO()
 
-  def echo(self, message):
-    self.test_output.write(message)
-    self.test_output.write("\n")
+    def echo(self, message):
+        self.test_output.write(message)
+        self.test_output.write("\n")
 
-  def get_content(self):
-    return self.test_output.getvalue()
+    def get_content(self):
+        return self.test_output.getvalue()
 
 def test_azure_resource_as_yaml(cli_runner):
-   azure_resource = MockAzureResource()
-   assert config.resource_as_yaml(azure_resource) == {
+    azure_resource = MockAzureResource()
+    assert config.resource_as_yaml(azure_resource) == {
                         config.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
                         config.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
                         config.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }
 
 def test_empty_azure_resource_group_as_yaml(cli_runner):
-   azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
-   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES: {} }
+    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
+    assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES: {} }
 
 def test_azure_resource_group_with_resource_as_yaml(cli_runner):
-   azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
-   resource = MockAzureResource()
-   azure_resource_group.add_resource(resource)
-   assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES: {
+    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP)
+    resource = MockAzureResource()
+    azure_resource_group.add_resource(resource)
+    assert azure_resource_group.as_yaml() == { config.YAML_RESOURCES: {
                                                 MockAzureResource.name: config.resource_as_yaml(resource)
                                             }}
 
@@ -114,22 +114,22 @@ def test_update_subscription_from_remote():
     resource = MockAzureResource()
 
     def mock_get_resources(credentials, subscription_id):
-      return { TEST_RESOURCE_GROUP: [ resource], ANOTHER_RESOURCE_GROUP: [] }
+        return { TEST_RESOURCE_GROUP: [ resource], ANOTHER_RESOURCE_GROUP: [] }
 
     subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID })
     subscription.update_from_remote(None, mock_get_resources)
-    
+
     assert subscription.as_yaml() == { config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
              config.YAML_RESOURCE_GROUPS:
                 {
                   TEST_RESOURCE_GROUP:
                   {
-                    config.YAML_RESOURCES: 
+                    config.YAML_RESOURCES:
                     { MockAzureResource.name: config.resource_as_yaml(resource) }
-                  }, 
+                  },
                   ANOTHER_RESOURCE_GROUP:
                   {
-                    config.YAML_RESOURCES: 
+                    config.YAML_RESOURCES:
                     {}
                   }
                 }
@@ -140,11 +140,11 @@ def test_compare_subscription_with_1_remote_resource():
     resource = MockAzureResource()
 
     def mock_get_resources(credentials, subscription_id):
-      return { TEST_RESOURCE_GROUP: [ resource] }
+        return { TEST_RESOURCE_GROUP: [ resource] }
 
     subscription = config.AzureSubscription({ config.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID })
     mock_click = MockClick()
-    
+
     subscription.compare_with_remote(None, mock_click, mock_get_resources)
 
     assert mock_click.get_content().startswith(f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nThere are differences")

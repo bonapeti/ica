@@ -19,7 +19,7 @@ def expect_string(dict_var, name, error_message):
     value = dict_var.get(name)
     if value is None:
         raise ValueError(error_message)
-    assert type(value) == str
+    assert isinstance(value, str)
     return value
 
 class AzureConfig:
@@ -39,10 +39,10 @@ class AzureConfig:
 
     def as_yaml(self):
         return [ {
-                    "cloud": AZURE, 
-                    YAML_SUBSCRIPTION_LIST: [ subscription.as_yaml() for subscription in self.subscriptions] 
+                    "cloud": AZURE,
+                    YAML_SUBSCRIPTION_LIST: [ subscription.as_yaml() for subscription in self.subscriptions]
                  } ]
-    
+
 
 def save_yaml(yaml, ostream) -> None:
     ruamel_yaml = YAML()
@@ -59,7 +59,7 @@ def new_azure_config(subscription_id: str) -> AzureConfig:
 def load_yaml(source) -> AzureConfig:
     ruamel_yaml = YAML()
     yaml = ruamel_yaml.load(source)
-    
+
     not_supported_providers = {provider.get("cloud","") for provider in yaml if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
     for not_supported in not_supported_providers:
         logging.warning(f"Cloud provider '{not_supported}' is not supported")
@@ -70,11 +70,11 @@ def load_yaml(source) -> AzureConfig:
 
     if len(azure_providers) > 1:
         raise ValueError("More than one Azure tenant defined, only one expected!")
-    
+
     azure_cloud = azure_providers[0]
-    
+
     assert azure_cloud[YAML_SUBSCRIPTION_LIST], f"Missing '{YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
-    
+
     return AzureConfig(list(map(load_subscription, azure_cloud[YAML_SUBSCRIPTION_LIST])))
 
 def load_resource_group(name, resource_group_yaml):
@@ -150,7 +150,7 @@ class AzureSubscription:
 
     def add_resource_group(self, resource_group):
         self.resource_groups[resource_group.name] = resource_group
-            
+
     def update_from_remote(self, credentials, get_resources = get_resources) -> None:
 
         for remote_resource_group_name, remote_resource_list in get_resources(credentials, self.id).items():
@@ -173,27 +173,27 @@ class AzureSubscription:
         remote_keys = remote_resources.keys()
         common = local_keys & remote_keys
         only_local = local_keys ^ common
-        
+
         only_remote = remote_keys ^ common
 
         diff_list = []
         for only_local_resource_group in only_local:
             diff_list.append([ only_local_resource_group, "", ""])
-        
+
         for common_resource_group in common:
             diff_list.append([ "", common_resource_group, ""])
 
         for only_remote_resource_group in only_remote:
             diff_list.append([ "", "", only_remote_resource_group])
 
-        
+
 
         if only_local or only_remote:
             output.echo(f"There are differences:\n")
             print(tabulate(diff_list, headers=["Only local", "Common", "Only remote"]))
         else:
             output.echo("No changes")
-        
+
 
     def __repr__(self):
         return id
@@ -214,7 +214,3 @@ def load_subscription(subscription_yaml) -> AzureSubscription:
             azure_subscription.add_resource_group(load_resource_group(name, resource_group_yaml))
 
     return azure_subscription
-
-
-
-        
