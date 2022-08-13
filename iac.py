@@ -60,6 +60,21 @@ def pull(file):
         click.echo(f"Cannot find {file}")
 
 @main.command()
+@click.option("-f","--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
+def push(file):
+    """Pushes latest local changes to cloud"""
+
+    try:
+        with open_file_for_read(file) as stream:
+            local_config = load_yaml(stream)
+
+            with AzureCliCredential() as credential:
+                local_config.push(credential)
+
+    except FileNotFoundError:
+        click.echo(f"Cannot find {file}")
+
+@main.command()
 @click.option("-c","--cloud", required=True, type=click.Choice(['azure']), help="Supported cloud providers: 'azure'")
 @click.option("-s","--subscription_id", required=True, help="Subscription ID")
 def show(cloud, subscription_id):
