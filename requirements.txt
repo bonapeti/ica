@@ -6,3 +6,4 @@ pytest-click==1.1.0
 ruamel.yaml==0.17.21
 pytest-cov==3.0.0
 tabulate==0.8.10
+pytest-clarity==1.0.1
