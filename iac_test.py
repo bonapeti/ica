@@ -23,7 +23,7 @@ def test_diff_with_file(cli_runner):
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()
         result = cli_runner.invoke(main, ["diff"])
-        assert result.output.startswith(f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nNo changes")
+        assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nNo changes"
         assert result.exit_code == 0
 
 def test_show(cli_runner):
