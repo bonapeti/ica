@@ -2,7 +2,7 @@
 import sys
 import logging
 import click
-from azure.identity import AzureCliCredential
+from azure_api import login
 from config import load_yaml, new_azure_config, save_yaml
 
 DEFAULT_FILENAME = "infrastructure.yaml"
@@ -35,7 +35,7 @@ def diff(file):
         with open_file_for_read(file) as stream:
             local_config = load_yaml(stream)
 
-            with AzureCliCredential() as credential:
+            with login() as credential:
                 local_config.compare_with_remote(credential, click)
 
     except FileNotFoundError:
@@ -50,7 +50,7 @@ def pull(file):
         with open_file_for_read(file) as stream:
             local_config = load_yaml(stream)
 
-            with AzureCliCredential() as credential:
+            with login() as credential:
                 local_config.update_from_remote(credential)
 
             with open_file_for_write(file) as output:
@@ -68,7 +68,7 @@ def push(file):
         with open_file_for_read(file) as stream:
             local_config = load_yaml(stream)
 
-            with AzureCliCredential() as credential:
+            with login() as credential:
                 local_config.push(credential)
 
     except FileNotFoundError:
@@ -84,7 +84,7 @@ def show(cloud, subscription_id):
     assert cloud == 'azure', "The supported cloud providers are: ['azure']"
     local_config = new_azure_config(subscription_id)
 
-    with AzureCliCredential() as credential:
+    with login() as credential:
         local_config.update_from_remote(credential)
 
     save_yaml(local_config.as_yaml(), sys.stdout)
