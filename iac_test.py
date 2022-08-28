@@ -1,3 +1,5 @@
+from pytest import monkeypatch
+
 from iac import main, open_file_for_read, open_file_for_write, DEFAULT_FILENAME
 from azure_yaml import AZURE
 from azure_api import get_resources, login
@@ -19,7 +21,7 @@ def test_diff_without_file(cli_runner):
     assert result.output == f"Cannot find {DEFAULT_FILENAME}\n"
     assert result.exit_code == 0
 
-def test_diff_with_file(cli_runner):
+def test_diff_with_file(cli_runner, monkeypatch):
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()
         result = cli_runner.invoke(main, ["diff"])
