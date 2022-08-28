@@ -135,15 +135,6 @@ def load_resource_from_yaml(name, resource_yaml) -> Resource:
 
 def azure_resource_as_yaml(azure_resource) -> dict:
     return azure_resource
-    # local_resource = { azure_yaml.YAML_AZURE_RESOURCE_TYPE: azure_resource.type }
-    # local_resource[azure_yaml.YAML_AZURE_RESOURCE_LOCATION] = azure_resource.location
-    # if azure_resource.kind:
-    #     local_resource["kind"] = azure_resource.kind
-    # if azure_resource.managed_by:
-    #     local_resource["managed_by"] = azure_resource.managed_by
-    # if azure_resource.tags:
-    #     local_resource["tags"] = azure_resource.tags
-    # return local_resource
 
 class AzureSubscription:
 
