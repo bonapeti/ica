@@ -12,7 +12,7 @@ CONFIG_FILE_HELP="YAML file describing infrastructure"
 @click.version_option(version="0.0.3")
 @click.option('--debug/--no-debug', default=False)
 def main(debug = False):
-    """Manages cloud infrastructure as code"""
+    """Manages cloud infrastructure with YAML"""
 
     if debug:
         logging.basicConfig(level=logging.DEBUG)
