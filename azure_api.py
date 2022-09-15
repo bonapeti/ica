@@ -1,4 +1,6 @@
 """All Azure API related functions"""
+import importlib
+import logging
 from unicodedata import name
 from azure.identity import AzureCliCredential
 from azure.mgmt.resource import ResourceManagementClient
@@ -7,6 +9,7 @@ from azure.core.exceptions import ResourceNotFoundError
 from perf_decorator import timeit
 import azure_yaml
 
+SUBSCRIPTION_IDS = "subscription_ids"
 MISSING_SUBSCRIPTION_ID = "Missing subscription ID"
 GET_RESOURCES_EXPAND="createdTime,changedTime,provisioningState"
 AVAILABLE_REGIONS = {
@@ -58,6 +61,45 @@ def validate_location(location_name: str):
         raise ValueError(f"'{location_name}' is not an Azure supported region")
 
 @timeit
+def get_all_resources(credentials, subscription_id) -> list:
+    """Returns all resources groups as list"""
+    assert subscription_id, MISSING_SUBSCRIPTION_ID
+    resources = []
+    with ResourceManagementClient(credentials, subscription_id) as resource_client:
+        for resource_group in resource_client.resource_groups.list():
+            resources.append(to_yaml(resource_group))
+        for resource in resource_client.resources.list(expand=GET_RESOURCES_EXPAND):
+            resources.append(to_yaml(resource))
+    return resources
+
+def to_yaml(azure_resource):
+    azure_resource_type = azure_resource.type
+    try:
+        return to_yaml_by_type(azure_resource)
+    except ModuleNotFoundError:
+        logging.warn(f"Azure resource type '{azure_resource_type}' is not fully supported yet")
+        return to_yaml_as_generic(azure_resource)
+
+def to_yaml_by_type(azure_resource):
+    azure_resource_type = azure_resource.type
+    module_name = azure_resource_type.replace("/",".")
+    azure_resource_type_module = importlib.import_module(module_name)
+    as_yaml = getattr(azure_resource_type_module,"as_yaml")
+    return as_yaml(azure_resource)
+
+def to_yaml_as_generic(azure_resource):
+    resource_as_yaml = { "id": azure_resource.id,
+                        "name": azure_resource.name,
+                        "type": azure_resource.type,
+                        "location": azure_resource.location,
+                        }
+    if azure_resource.tags:
+        resource_as_yaml["tags"] = azure_resource.tags
+    if azure_resource.managed_by:
+        resource_as_yaml["managed_by"] = azure_resource.managed_by
+    return resource_as_yaml
+
+@timeit
 def get_resources(credentials, subscription_id) -> dict:
     """Returns all resources groups and resources as dictionary"""
     assert subscription_id, MISSING_SUBSCRIPTION_ID
@@ -67,7 +109,7 @@ def get_resources(credentials, subscription_id) -> dict:
         for resource_group in list(resource_client.resource_groups.list()):
             result[resource_group.name] = { azure_yaml.YAML_AZURE_RESOURCE_NAME: resource_group.name, azure_yaml.YAML_AZURE_RESOURCE_LOCATION: resource_group.location }
             resources = {}
-            result[resource_group.name][azure_yaml.YAML_RESOURCE_GROUPS] = resources
+            result[resource_group.name][azure_yaml.YAML_RESOURCES] = resources
             for resource in __get_resources_in_resource_group(resource_client, resource_group.name):
                 resources[resource.name] = { azure_yaml.YAML_AZURE_RESOURCE_NAME: resource.name }
     return result

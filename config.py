@@ -6,6 +6,10 @@ import azure_yaml
 
 SUPPORTED_PROVIDERS=[azure_yaml.AZURE]
 
+def print_cloud_resources(cloud_resources, output) -> None:
+    ruamel_yaml = YAML()
+    ruamel_yaml.dump(cloud_resources, output)
+
 def expect_string(dict_var, name, error_message):
     value = dict_var.get(name)
     if value is None:

@@ -1,9 +1,7 @@
-from pytest import monkeypatch
-
 from iac import main, open_file_for_read, open_file_for_write, DEFAULT_FILENAME
-from azure_yaml import AZURE
-from azure_api import get_resources, login
-from config_test import TEST_YAML, TEST_SUBSCRIPTION_ID
+import azure_yaml
+import azure_api
+from config_test import TEST_YAML, TEST_SUBSCRIPTION_ID, TEST_LOCATION_NORTH_EUROPE
 
 TEST_SUBSCRIPTION_ID="5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2"
 
@@ -21,15 +19,38 @@ def test_diff_without_file(cli_runner):
     assert result.output == f"Cannot find {DEFAULT_FILENAME}\n"
     assert result.exit_code == 0
 
+mock_crednetial = {}
+
+def mocklogin():
+    print("mocklogin")
+    return mock_crednetial
+
 def test_diff_with_file(cli_runner, monkeypatch):
-    with cli_runner.isolated_filesystem():
-        prepare_test_config_file()
-        result = cli_runner.invoke(main, ["diff"])
-        assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nNo changes"
-        assert result.exit_code == 0
+
+    remote_resources = {
+        "NetworkWatcherRG" :
+            {
+                azure_yaml.YAML_AZURE_RESOURCE_LOCATION : TEST_LOCATION_NORTH_EUROPE,
+                azure_yaml.YAML_RESOURCES : {}
+            }
+    }
+
+    def mockget_resources():
+        print("mockget_resources")
+        return remote_resources
+
+
+    with monkeypatch.context() as m:
+        m.setattr(azure_api, "login", mocklogin)
+        m.setattr(azure_api, "get_resources", mockget_resources)
+        with cli_runner.isolated_filesystem():
+            prepare_test_config_file()
+            result = cli_runner.invoke(main, ["diff"])
+            assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nNo changes"
+            assert result.exit_code == 0
 
 def test_show(cli_runner):
-    result = cli_runner.invoke(main, ["show","-c",AZURE,"-s",TEST_SUBSCRIPTION_ID])
+    result = cli_runner.invoke(main, ["show","-c",azure_yaml.AZURE,"-s",TEST_SUBSCRIPTION_ID])
     with open_file_for_read("./test_subscription.yaml") as expected_file:
         assert result.output == expected_file.read()
     assert result.exit_code == 0
@@ -56,6 +77,6 @@ def test_push(cli_runner):
         result = cli_runner.invoke(main, ["push"])
         assert result.output == ""
         assert result.exit_code == 0
-        with login() as credential:
-            resource_dict = get_resources(credential, TEST_SUBSCRIPTION_ID)
+        with azure_api.login() as credential:
+            resource_dict = azure_api.get_resources(credential, TEST_SUBSCRIPTION_ID)
             assert resource_dict[new_resource_group_name], "Azure subscription should have new resource group"
