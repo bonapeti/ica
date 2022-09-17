@@ -1,4 +1,4 @@
-from iac2 import main
+from cc import main
 import core
 import config
 

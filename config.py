@@ -1,6 +1,6 @@
 import logging
 from ruamel.yaml import YAML
-import azure_api
+import cloud.azure.api
 from tabulate import tabulate
 import azure_yaml
 
@@ -112,7 +112,7 @@ class ResourceGroup:
         return { azure_yaml.YAML_AZURE_RESOURCE_LOCATION: self.location, azure_yaml.YAML_RESOURCES: { name: resource.as_yaml() for name, resource in self.resources.items()} }
 
     def push(self, credentials, subscription_id) -> None:
-        azure_api.update_resource_group(credentials, subscription_id, self.name, resource_group={
+        cloud.azure.api.update_resource_group(credentials, subscription_id, self.name, resource_group={
             azure_yaml.YAML_AZURE_RESOURCE_LOCATION: self.location
         })
 
@@ -156,7 +156,7 @@ class AzureSubscription:
     def add_resource_group(self, resource_group):
         self.resource_groups[resource_group.name] = resource_group
 
-    def update_from_remote(self, credentials, get_resources = azure_api.get_resources) -> None:
+    def update_from_remote(self, credentials, get_resources = cloud.azure.api.get_resources) -> None:
 
         for remote_resource_group_name, remote_resource_dict in get_resources(credentials, self.id).items():
             resource_group = ResourceGroup(remote_resource_group_name, remote_resource_dict[azure_yaml.YAML_AZURE_RESOURCE_LOCATION])
@@ -168,7 +168,7 @@ class AzureSubscription:
                     resource_group.add_resource(resource)
 
     def push(self, credentials) -> None:
-        remote_resources = azure_api.get_resources(credentials, self.id)
+        remote_resources = cloud.azure.api.get_resources(credentials, self.id)
 
         local_keys = self.resource_groups.keys()
         remote_keys = remote_resources.keys()
@@ -181,11 +181,11 @@ class AzureSubscription:
             self.resource_groups[only_local].push(credentials, self.id)
 
         for only_remote in only_remotes:
-            azure_api.delete_resource_group(credentials, self.id, only_remote)
+            cloud.azure.api.delete_resource_group(credentials, self.id, only_remote)
 
 
 
-    def compare_with_remote(self, credentials, output, get_resources = azure_api.get_resources):
+    def compare_with_remote(self, credentials, output, get_resources = cloud.azure.api.get_resources):
 
         remote_resources = get_resources(credentials, self.id)
         output.echo(f"Azure subscription '{self.id}'")

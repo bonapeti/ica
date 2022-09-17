@@ -2,7 +2,7 @@
 import sys
 import logging
 import click
-from azure_api import login
+from cloud.azure.api import login
 from config import load_yaml, new_azure_config, save_yaml
 
 DEFAULT_FILENAME = "infrastructure.yaml"
@@ -73,24 +73,6 @@ def push(file):
 
     except FileNotFoundError:
         click.echo(f"Cannot find {file}")
-
-@main.command()
-@click.option("-c","--cloud", required=True, type=click.Choice(['azure']), help="Supported cloud providers: 'azure'")
-@click.option("-s","--subscription_id", required=True, help="Subscription ID")
-def show(cloud, subscription_id):
-    """Prints cloud infrastructure to stdout as YAML"""
-
-    logging.debug("Calling 'show' command")
-    assert cloud == 'azure', "The supported cloud providers are: ['azure']"
-    local_config = new_azure_config(subscription_id)
-
-    with login() as credential:
-        local_config.update_from_remote(credential)
-
-    save_yaml(local_config.as_yaml(), sys.stdout)
-
-
-
 
 
 if __name__ == '__main__':

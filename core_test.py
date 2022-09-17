@@ -1,5 +1,5 @@
 import core
-import azure_api
+import cloud.azure.api
 
 class MockAzureCredential:
     def __init__(self):
@@ -16,17 +16,15 @@ class MockAzureCredential:
 def test_get_resources(monkeypatch):
 
     test_subscription_id = "subscription_id"
-    expected_resources = [
-                        {
-                            "cloud": "azure",
-                            "subscriptions": [
-                                    {
-                                        "id": test_subscription_id,
-                                        "resources": []
-                                    }
-                                ]
-                        }
-                        ]
+    expected_resources = [{
+                                "cloud": "azure",
+                                "subscriptions": [
+                                        {
+                                            "id": test_subscription_id,
+                                            "resources": []
+                                        }
+                                    ]
+                        }]
 
 
     def get_all_resources(credentials, subscription_id):
@@ -36,7 +34,7 @@ def test_get_resources(monkeypatch):
     def azure_login():
         return MockAzureCredential()
 
-    monkeypatch.setattr(azure_api, "login", azure_login)
-    monkeypatch.setattr(azure_api, "get_all_resources", get_all_resources)
+    monkeypatch.setattr(cloud.azure.api, "login", azure_login)
+    monkeypatch.setattr(cloud.azure.api, "get_all_resources", get_all_resources)
 
-    assert expected_resources == core.get_cloud_resources([ { "type": "azure", azure_api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
+    assert expected_resources == core.get_cloud_resources([ { "type": "azure", cloud.azure.api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
