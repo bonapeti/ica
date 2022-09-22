@@ -55,6 +55,10 @@ def calculate_differences(local_config):
                 else:
                     if len(local_resources) == 0:
                         return remote_resources
+                    elif len(remote_resources) == 0:
+                        return local_resources
+                    else:
+                        return []
 
 
     return differences

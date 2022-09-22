@@ -61,3 +61,22 @@ def test_diff_local_resource_added(cli_runner, monkeypatch):
         result = cli_runner.invoke(main, ["diff"])
         assert result.output == "Azure subscription '" + TEST_SUBSCRIPTION_ID + "'\nThere are differences:\n"
         assert result.exit_code == 0
+
+def test_diff_remote_resource_added(cli_runner, monkeypatch):
+
+    def azure_get_all_resources(credentials, subscription_id):
+        return [ ]
+
+    monkeypatch.setattr(cloud.azure.api, "get_all_resources", azure_get_all_resources)
+
+    with cli_runner.isolated_filesystem():
+        prepare_test_config_file_with_content(f"""\
+- cloud: azure
+  subscriptions:
+  - id: {TEST_SUBSCRIPTION_ID}
+    resources:
+    - name: remote_resource
+""")
+        result = cli_runner.invoke(main, ["diff"])
+        assert result.output == "Azure subscription '" + TEST_SUBSCRIPTION_ID + "'\nThere are differences:\n"
+        assert result.exit_code == 0
