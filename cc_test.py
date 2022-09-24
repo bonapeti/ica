@@ -46,7 +46,7 @@ def test_no_diff(cli_runner, monkeypatch):
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()
         result = cli_runner.invoke(main, ["diff"])
-        assert result.output == f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nNo changes\n"
+        assert result.output == "No changes\n"
         assert result.exit_code == 0
 
 def test_diff_local_resource_added(cli_runner, monkeypatch):
@@ -59,7 +59,7 @@ def test_diff_local_resource_added(cli_runner, monkeypatch):
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()
         result = cli_runner.invoke(main, ["diff"])
-        assert result.output == "Azure subscription '" + TEST_SUBSCRIPTION_ID + "'\nThere are differences:\n"
+        assert result.output == "There are differences\n"
         assert result.exit_code == 0
 
 def test_diff_remote_resource_added(cli_runner, monkeypatch):
@@ -78,5 +78,5 @@ def test_diff_remote_resource_added(cli_runner, monkeypatch):
     - name: remote_resource
 """)
         result = cli_runner.invoke(main, ["diff"])
-        assert result.output == "Azure subscription '" + TEST_SUBSCRIPTION_ID + "'\nThere are differences:\n"
+        assert result.output == "There are differences\n"
         assert result.exit_code == 0

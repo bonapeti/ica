@@ -36,9 +36,9 @@ def diff(file):
     with config.open_file_for_read(file) as stream:
         differences = core.calculate_differences(config.load2(stream))
         if len(differences) ==0:
-            click.echo(f"Azure subscription '5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2'\nNo changes")
+            click.echo("No changes")
         else:
-            click.echo(f"Azure subscription '5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2'\nThere are differences:")
+            click.echo("There are differences")
 
 if __name__ == '__main__':
     try:

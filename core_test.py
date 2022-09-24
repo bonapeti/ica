@@ -37,4 +37,4 @@ def test_get_resources(monkeypatch):
     monkeypatch.setattr(cloud.azure.api, "login", azure_login)
     monkeypatch.setattr(cloud.azure.api, "get_all_resources", get_all_resources)
 
-    assert expected_resources == core.__get_cloud_resources([ { "type": "azure", cloud.azure.api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
+    assert expected_resources == core.__get_cloud_resources([ { "cloud": "azure", cloud.azure.api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
