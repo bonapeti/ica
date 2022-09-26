@@ -4,6 +4,7 @@ import logging
 import click
 import core
 import config
+from tabulate import tabulate
 
 DEFAULT_FILENAME = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
@@ -39,6 +40,7 @@ def diff(file):
             click.echo("No changes")
         else:
             click.echo("There are differences")
+            print(tabulate(differences, headers=["Only local", "Common", "Only remote"]))
 
 if __name__ == '__main__':
     try:

@@ -1,7 +1,7 @@
 - cloud: azure
   subscriptions:
   - id: 5ed44b1f-1379-4af2-b7c5-097bbd2e2ee2
-    resourceGroups:
+    resources:
       NetworkWatcherRG:
         location: northeurope
       azure_devops_resources:

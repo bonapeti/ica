@@ -46,7 +46,7 @@ def __new_azure_request(subscription_ids):
     return [ { "cloud" : "azure", "subscription_ids" : subscription_ids} ]
 
 def calculate_differences(local_config):
-
+    logging.debug(local_config)
     for config in local_config:
         cloud = get_cloud_type(config)
         assert "azure" == cloud
@@ -82,15 +82,21 @@ def get_resources(subscription):
     return []
 
 def __calculate_difference_between_resources(local_resources, remote_resources):
+    logging.debug(f"Local resources: {local_resources}")
+    logging.debug(f"Remote resources: {remote_resources}")
+
     if len(local_resources) == 0 and len(remote_resources) == 0:
         return []
 
     if len(local_resources) == 0:
-        return remote_resources
+        return [ [ "", "", resource_name(remote_resource) ] for remote_resource in remote_resources]
     elif len(remote_resources) == 0:
-        return local_resources
+        return [ [ resource_name(local_resource), "", "" ] for local_resource in local_resources]
 
     return []
+
+def resource_name(resource):
+    return resource["name"]
 
 def require(dict_object, key, error_message):
     if key not in dict_object:
