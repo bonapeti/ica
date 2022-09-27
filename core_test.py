@@ -38,3 +38,12 @@ def test_get_resources(monkeypatch):
     monkeypatch.setattr(cloud.azure.api, "get_all_resources", get_all_resources)
 
     assert expected_resources == core.__get_cloud_resources([ { "cloud": "azure", cloud.azure.api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
+
+def test_basic_difference_calculation():
+    assert [] == core.__calculate_difference_between_resources([],[])
+
+    remote_resource = { "name":"remote_resource"}
+    assert [ ["","", remote_resource]] == core.__calculate_difference_between_resources([],[remote_resource])
+
+    local_resource = { "name":"local_resource" }
+    assert  [[local_resource,"", ""]] == core.__calculate_difference_between_resources([local_resource],[])

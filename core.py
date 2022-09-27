@@ -89,9 +89,9 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
         return []
 
     if len(local_resources) == 0:
-        return [ [ "", "", resource_name(remote_resource) ] for remote_resource in remote_resources]
+        return [ [ "", "", remote_resource ] for remote_resource in remote_resources]
     elif len(remote_resources) == 0:
-        return [ [ resource_name(local_resource), "", "" ] for local_resource in local_resources]
+        return [ [ local_resource, "", "" ] for local_resource in local_resources]
 
     return []
 
