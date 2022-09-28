@@ -118,7 +118,7 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
 
 
 def __compare_resource(local_resource, remote_resource):
-    return not local_resource == remote_resource
+    return local_resource != remote_resource
 
 def resource_name(resource):
     return resource["name"]
