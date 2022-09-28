@@ -60,3 +60,10 @@ def test_calculate_difference_1_local_2_remote():
     remote_resource1 = { "name":"resource"}
     remote_resource2 = { "name":"resource2"}
     assert [ ["","", remote_resource2] ] == core.__calculate_difference_between_resources([local_resource],[remote_resource1, remote_resource2])
+
+def test_calculate_difference_2_local_1_remote():
+
+    local_resource = { "name":"resource" }
+    local_resource2 = { "name":"resource2" }
+    remote_resource = { "name":"resource"}
+    assert [[ local_resource2,"", ""] ] == core.__calculate_difference_between_resources([local_resource, local_resource2],[remote_resource])
