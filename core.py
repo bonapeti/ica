@@ -92,8 +92,33 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
         return [ [ "", "", remote_resource ] for remote_resource in remote_resources]
     elif len(remote_resources) == 0:
         return [ [ local_resource, "", "" ] for local_resource in local_resources]
+    else:
+        local_resources_dict = { resource_name(resource) : resource for resource in local_resources }
+        remote_resource_dict = { resource_name(resource) : resource for resource in remote_resources }
 
-    return []
+        local_keys = local_resources_dict.keys()
+        remote_keys = remote_resource_dict.keys()
+        common = local_keys & remote_keys
+        only_local = local_keys ^ common
+
+        only_remote = remote_keys ^ common
+
+        diff_list = []
+        for local_resource_key in only_local:
+            diff_list.append([ local_resources_dict[local_resource_key], "", ""])
+
+        for common_resource_key in common:
+            if __compare_resource(local_resources_dict[common_resource_key], remote_resource_dict[common_resource_key]):
+                diff_list.append([ "", local_resources_dict[common_resource_key], ""])
+
+        for remote_resource_key in only_remote:
+            diff_list.append([ "", "", remote_resource_dict[remote_resource_key]])
+
+        return diff_list
+
+
+def __compare_resource(local_resource, remote_resource):
+    return not local_resource == remote_resource
 
 def resource_name(resource):
     return resource["name"]
