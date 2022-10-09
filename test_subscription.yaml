@@ -4,5 +4,5 @@
     resources:
     - name: NetworkWatcherRG
       location: northeurope
-    - name: azure_devops_resources
-      location: northeurope
+    - name: NewResourceGroup
+      location: eastus2

@@ -83,6 +83,15 @@ def get_resources(subscription):
         return resources
     return []
 
+def create_only_local_resource(resource):
+    return [ resource, None, None ]
+
+def create_only_remote_resource(resource):
+    return [ None, None, resource ]
+
+def create_dict_from_resources_by_name(resource_list):
+    return { resource_name(resource) : resource for resource in resource_list }
+
 def __calculate_difference_between_resources(local_resources, remote_resources):
     logging.debug(f"Local resources: {local_resources}")
     logging.debug(f"Remote resources: {remote_resources}")
@@ -91,23 +100,24 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
         return []
 
     if len(local_resources) == 0:
-        return [ [ "", "", remote_resource ] for remote_resource in remote_resources]
+        return [ create_only_remote_resource(remote_resource) for remote_resource in remote_resources]
     elif len(remote_resources) == 0:
-        return [ [ local_resource, "", "" ] for local_resource in local_resources]
+        return [ create_only_local_resource(local_resource) for local_resource in local_resources]
     else:
-        local_resources_dict = { resource_name(resource) : resource for resource in local_resources }
-        remote_resource_dict = { resource_name(resource) : resource for resource in remote_resources }
+        local_resources_dict = create_dict_from_resources_by_name(local_resources)
+        remote_resource_dict = create_dict_from_resources_by_name(remote_resources)
 
         local_keys = local_resources_dict.keys()
         remote_keys = remote_resource_dict.keys()
-        common = local_keys & remote_keys
-        only_local = local_keys ^ common
 
+        common = local_keys & remote_keys
+
+        only_local = local_keys ^ common
         only_remote = remote_keys ^ common
 
         diff_list = []
         for local_resource_key in only_local:
-            diff_list.append([ local_resources_dict[local_resource_key], "", ""])
+            diff_list.append(create_only_local_resource(local_resources_dict[local_resource_key]))
 
         for common_resource_key in common:
             resource_diffs = __compare_resource(local_resources_dict[common_resource_key], remote_resource_dict[common_resource_key])
@@ -115,7 +125,7 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
                 diff_list.append([ local_resources_dict[common_resource_key], resource_diffs, remote_resource_dict[common_resource_key]])
 
         for remote_resource_key in only_remote:
-            diff_list.append([ "", "", remote_resource_dict[remote_resource_key]])
+            diff_list.append(create_only_remote_resource(remote_resource_dict[remote_resource_key]))
 
         return diff_list
 
@@ -123,22 +133,25 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
 def __compare_resource(local_resource, remote_resource):
     local_keys = local_resource.keys()
     remote_keys = remote_resource.keys()
+
     common = local_keys & remote_keys
+
     only_local = local_keys ^ common
     only_remote = remote_keys ^ common
 
     diff = {}
     for local_resource_key in only_local:
-        diff[local_resource_key] = (local_resource[local_resource_key], None)
+        if local_resource[local_resource_key]:
+            diff[local_resource_key] = (local_resource[local_resource_key], None)
 
     for common_resource_key in common:
-        if local_resource[common_resource_key] != remote_resource[common_resource_key]:
-            diff[common_resource_key] = (local_resource[common_resource_key], remote_resource[common_resource_key])
+        if local_resource[common_resource_key] and remote_resource[common_resource_key]:
+            if local_resource[common_resource_key] != remote_resource[common_resource_key]:
+                diff[common_resource_key] = (local_resource[common_resource_key], remote_resource[common_resource_key])
 
     for remote_resource_key in only_remote:
-        diff[remote_resource_key] = (None, remote_resource[remote_resource_key])
-
-
+        if remote_resource[remote_resource_key]:
+            diff[remote_resource_key] = (None, remote_resource[remote_resource_key])
 
     return diff
 

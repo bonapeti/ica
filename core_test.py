@@ -39,26 +39,29 @@ def test_get_resources(monkeypatch):
 
     assert expected_resources == core.__get_cloud_resources([ { "cloud": "azure", cloud.azure.api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
 
+def assert_no_difference(local_resources, remote_resources):
+    assert [] == core.__calculate_difference_between_resources(local_resources,remote_resources)
+
 def test_basic_difference_calculation():
-    assert [] == core.__calculate_difference_between_resources([],[])
+    assert_no_difference([],[])
 
     remote_resource = { "name":"remote_resource"}
-    assert [ ["","", remote_resource]] == core.__calculate_difference_between_resources([],[remote_resource])
+    assert [ core.create_only_remote_resource(remote_resource) ] == core.__calculate_difference_between_resources([],[remote_resource])
 
     local_resource = { "name":"local_resource" }
-    assert  [[local_resource,"", ""]] == core.__calculate_difference_between_resources([local_resource],[])
+    assert [ core.create_only_local_resource(local_resource) ] == core.__calculate_difference_between_resources([local_resource],[])
 
 def test_calculate_difference_same_resource_in_local_and_remote_should_result_no_difference():
 
     local_resource = { "name":"resource" }
     remote_resource = { "name":"resource"}
-    assert [ ] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
+    assert_no_difference([local_resource],[remote_resource])
 
 def test_calculate_difference_different_resources_in_local_and_remote_should_result_shows_difference():
 
     local_resource = { "name":"resource1" }
     remote_resource = { "name":"resource2"}
-    assert [ [ local_resource, "", ""], ["","", remote_resource]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
+    assert [ core.create_only_local_resource(local_resource), core.create_only_remote_resource(remote_resource)] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
 def test_calculate_difference_same_resource_with_different_values_should_result_shows_difference():
 
@@ -72,11 +75,11 @@ def test_calculate_difference_1_local_2_remote():
     local_resource = { "name":"resource" }
     remote_resource1 = { "name":"resource"}
     remote_resource2 = { "name":"resource2"}
-    assert [ ["","", remote_resource2] ] == core.__calculate_difference_between_resources([local_resource],[remote_resource1, remote_resource2])
+    assert [ core.create_only_remote_resource(remote_resource2) ] == core.__calculate_difference_between_resources([local_resource],[remote_resource1, remote_resource2])
 
 def test_calculate_difference_2_local_1_remote():
 
     local_resource = { "name":"resource" }
     local_resource2 = { "name":"resource2" }
     remote_resource = { "name":"resource"}
-    assert [[ local_resource2,"", ""] ] == core.__calculate_difference_between_resources([local_resource, local_resource2],[remote_resource])
+    assert [core.create_only_local_resource(local_resource2) ] == core.__calculate_difference_between_resources([local_resource, local_resource2],[remote_resource])

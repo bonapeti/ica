@@ -5,6 +5,7 @@ import click
 import core
 import config
 from tabulate import tabulate
+import textwrap
 
 DEFAULT_FILENAME = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
@@ -36,11 +37,46 @@ def diff(file):
     logging.debug(f"Calling 'diff' command, parameters:\"-f {file}\"")
     with config.open_file_for_read(file) as stream:
         differences = core.calculate_differences(config.load2(stream))
-        if len(differences) ==0:
+        if len(differences) == 0:
             click.echo("No changes")
         else:
             click.echo("There are differences")
-            print(tabulate(differences, headers=["Only local", "Common", "Only remote"]))
+            print_differences_with_tabular_format(differences)
+
+def print_differences_with_tabular_format(differences):
+    formatted = []
+    for difference in differences:
+        formatted.append([ get_resource_name(difference[0]), format_common(difference[1]), get_resource_name(difference[2])])
+    print(tabulate(formatted, headers=[bold("Local"), bold("Common"), bold("Remote")], tablefmt="simple", colalign=("left","center","right") ))
+
+def bold(text):
+    return "\033[1m" + text + "\033[0m"
+
+FIXED_WIDTH = 100
+def format_common(diffs):
+    if not diffs:
+        return ""
+
+    assert isinstance(diffs, dict), "Expecting dict"
+    common_as_string = []
+    for name, diff in diffs.items():
+        if diff[0] and not diff[1]:
+
+            common_as_string.append(textwrap.shorten(f"{bold(name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
+        elif not diff[0] and diff[1]:
+            common_as_string.append(textwrap.shorten(f"{bold(name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))
+        elif diff[0] and diff[1]:
+            common_as_string.append(textwrap.shorten(f"{bold(name)}: {diff[0]} <=> {diff[1]}", width=FIXED_WIDTH))
+    return "\n".join(common_as_string)
+
+def get_resource_name(resource):
+    if not resource:
+        return ""
+
+    if "name" in resource:
+        return resource["name"]
+    else:
+        return ""
 
 if __name__ == '__main__':
     try:
