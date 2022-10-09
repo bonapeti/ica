@@ -78,7 +78,9 @@ def get_id(subscription):
 
 def get_resources(subscription):
     if "resources" in subscription:
-        return subscription["resources"]
+        resources = subscription["resources"]
+        assert isinstance(resources, list), "Expecting list of resources"
+        return resources
     return []
 
 def __calculate_difference_between_resources(local_resources, remote_resources):
