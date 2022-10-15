@@ -40,6 +40,10 @@ def get_cloud_resources_from_azure(cloud_request):
     return cloud_resource
 
 def print_cloud_resources(cloud, subscription_id, output):
+    if cloud not in supported_cloud_providers:
+        logging.warning(f"Cloud provider {cloud} is not supported")
+        return
+
     config.print_cloud_resources(__get_cloud_resources( __new_azure_request([subscription_id])), output)
 
 def __new_azure_request(subscription_ids):
@@ -49,7 +53,7 @@ def calculate_differences(local_config):
     logging.debug(local_config)
     for config in local_config:
         cloud = get_cloud_type(config)
-        assert "azure" == cloud
+        assert cloud in supported_cloud_providers
 
         for subscription in get_subscriptions(config):
             subscription_id = get_id(subscription)
