@@ -2,7 +2,7 @@ import logging
 import cloud.azure.api
 import config
 
-supported_cloud_providers = set("azure")
+supported_cloud_providers = ("azure")
 
 def assert_cloud_provider_supported(cloud_provider):
     assert cloud_provider in supported_cloud_providers, f"Cloud provider '{cloud_provider}' is not supported"
@@ -52,8 +52,9 @@ def __new_azure_request(subscription_ids):
 def calculate_differences(local_config):
     logging.debug(local_config)
     for config in local_config:
+
         cloud = get_cloud_type(config)
-        assert cloud in supported_cloud_providers
+        assert_cloud_provider_supported(cloud)
 
         for subscription in get_subscriptions(config):
             subscription_id = get_id(subscription)

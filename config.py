@@ -12,6 +12,7 @@ def print_cloud_resources(cloud_resources, output) -> None:
 
 def open_file_for_read(file):
     """Opens file for reading with utf-8 encoding"""
+    logging.debug(f"Opening file '{file}'")
     return open(file,"r", encoding="utf-8")
 
 def open_file_for_write(file):
