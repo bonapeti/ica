@@ -20,41 +20,41 @@ def prepare_test_config_file_with_content(content):
     with config.open_file_for_write(DEFAULT_FILENAME) as test_config_file:
         test_config_file.write(content)
 
-def test_show(cli_runner, monkeypatch):
-
+def mock_azure_resources(monkeypatch, resources):
     def azure_get_all_resources(credentials, subscription_id):
-        return []
-
+        return resources
     monkeypatch.setattr(cloud.azure.api, "get_all_resources", azure_get_all_resources)
 
-    result = cli_runner.invoke(main, ["show","-c","azure","-s",TEST_SUBSCRIPTION_ID])
+def assert_normal_output(result, expected_output):
     assert result.exit_code == 0
-    assert result.output == f"""\
+    assert result.output == expected_output
+
+def test_show(cli_runner, monkeypatch):
+
+    mock_azure_resources(monkeypatch, [])
+
+    result = cli_runner.invoke(main, ["show","-c","azure","-s",TEST_SUBSCRIPTION_ID])
+
+    assert_normal_output(result, f"""\
 - cloud: azure
   subscriptions:
   - id: {TEST_SUBSCRIPTION_ID}
     resources: []
-"""
+""")
 
 def test_no_diff(cli_runner, monkeypatch):
 
-    def azure_get_all_resources(credentials, subscription_id):
-        return []
-
-    monkeypatch.setattr(cloud.azure.api, "get_all_resources", azure_get_all_resources)
+    mock_azure_resources(monkeypatch, [])
 
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()
         result = cli_runner.invoke(main, ["diff"])
-        assert result.output == "No changes\n"
-        assert result.exit_code == 0
+        assert_normal_output(result, "No changes\n")
+
 
 def test_diff_local_resource_added(cli_runner, monkeypatch):
 
-    def azure_get_all_resources(credentials, subscription_id):
-        return [ "local_resource_group"]
-
-    monkeypatch.setattr(cloud.azure.api, "get_all_resources", azure_get_all_resources)
+    mock_azure_resources(monkeypatch, [ "local_resource_group"])
 
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()
@@ -63,10 +63,7 @@ def test_diff_local_resource_added(cli_runner, monkeypatch):
 
 def test_diff_remote_resource_added(cli_runner, monkeypatch):
 
-    def azure_get_all_resources(credentials, subscription_id):
-        return [ ]
-
-    monkeypatch.setattr(cloud.azure.api, "get_all_resources", azure_get_all_resources)
+    mock_azure_resources(monkeypatch, [])
 
     with cli_runner.isolated_filesystem():
         prepare_test_config_file_with_content(f"""\
