@@ -1,8 +1,19 @@
 import logging
+import importlib
 import cloud.azure.api
 import config
 
-supported_cloud_providers = ("azure")
+supported_cloud_providers = {}
+
+for cloud_provider in ["azure"]:
+    try:
+        cloud_provider_module = importlib.import_module("." + cloud_provider + ".api", "cloud")
+        getattr(cloud_provider_module,"get_all_resources")
+        supported_cloud_providers[cloud_provider] = cloud_provider_module
+    except (AttributeError, ModuleNotFoundError) as cloud_provider_load_error:
+        logging.debug(str(cloud_provider_load_error))
+        logging.warning(f"Cloud provider {cloud_provider} is not supported")
+
 
 def assert_cloud_provider_supported(cloud_provider):
     assert cloud_provider in supported_cloud_providers, f"Cloud provider '{cloud_provider}' is not supported"
