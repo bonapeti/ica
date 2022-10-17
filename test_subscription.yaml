@@ -6,3 +6,4 @@
       location: northeurope
     - name: NewResourceGroup
       location: eastus2
+      type: Microsoft.Resources/resourceGroups
