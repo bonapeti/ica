@@ -1,14 +1,13 @@
 import logging
 import importlib
-import cloud.azure.api
 import config
 
 supported_cloud_providers = {}
 
 for cloud_provider in ["azure"]:
     try:
-        cloud_provider_module = importlib.import_module("." + cloud_provider + ".api", "cloud")
-        getattr(cloud_provider_module,"get_all_resources")
+        cloud_provider_module = importlib.import_module("." + cloud_provider + ".core", "cloud")
+        getattr(cloud_provider_module,"get_resources_from_cloud_provider")
         supported_cloud_providers[cloud_provider] = cloud_provider_module
     except (AttributeError, ModuleNotFoundError) as cloud_provider_load_error:
         logging.debug(str(cloud_provider_load_error))
@@ -25,30 +24,12 @@ def __get_cloud_resources(cloud_resources_request):
     for cloud_request in cloud_resources_request:
         cloud_provider = get_cloud_type(cloud_request)
 
-        if "azure" == cloud_provider:
-            cloud_resources.append(get_cloud_resources_from_azure(cloud_request))
+        if cloud_provider in supported_cloud_providers:
+            cloud_resources.append(supported_cloud_providers[cloud_provider].get_resources_from_cloud_provider(cloud_request))
         else:
             logging.warning(f"Cloud provider {cloud_provider} is not supported")
 
     return cloud_resources
-
-def get_cloud_resources_from_azure(cloud_request):
-    cloud_resource = { "cloud": "azure"}
-
-    if cloud.azure.api.SUBSCRIPTION_IDS in cloud_request:
-        subscription_ids = cloud_request[cloud.azure.api.SUBSCRIPTION_IDS]
-        if len(subscription_ids) > 0:
-
-
-            with cloud.azure.api.login() as credential:
-                subscriptions = []
-                cloud_resource["subscriptions"] = subscriptions
-
-                for subscription_id in subscription_ids:
-                    subscriptions.append({ "id": subscription_id,
-                                "resources": cloud.azure.api.get_all_resources(credential, subscription_id)})
-
-    return cloud_resource
 
 def print_cloud_resources(cloud, subscription_id, output):
     if cloud not in supported_cloud_providers:
