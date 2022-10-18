@@ -71,7 +71,7 @@ def format_common(diffs):
 
 def get_resource_name(resource):
     if not resource:
-        return ""
+        return "(Missing)"
 
     if "name" in resource:
         return resource["name"]
