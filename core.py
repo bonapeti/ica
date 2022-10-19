@@ -4,6 +4,11 @@ import config
 
 supported_cloud_providers = {}
 
+NOT_SUPPORTED_CLOUD_PROVIDER_MESSAGE="Cloud provider {cloud_provider} is not supported"
+
+def missing_cloud_provider_message(cloud_provider):
+    return str.format("Cloud provider {cloud_provider} is not supported", cloud_provider=cloud_provider)
+
 for cloud_provider in ["azure"]:
     try:
         cloud_provider_module = importlib.import_module("." + cloud_provider + ".core", "cloud")
@@ -11,11 +16,11 @@ for cloud_provider in ["azure"]:
         supported_cloud_providers[cloud_provider] = cloud_provider_module
     except (AttributeError, ModuleNotFoundError) as cloud_provider_load_error:
         logging.debug(str(cloud_provider_load_error))
-        logging.warning(f"Cloud provider {cloud_provider} is not supported")
+        logging.warning(missing_cloud_provider_message(cloud_provider))
 
 
 def assert_cloud_provider_supported(cloud_provider):
-    assert cloud_provider in supported_cloud_providers, f"Cloud provider '{cloud_provider}' is not supported"
+    assert cloud_provider in supported_cloud_providers, missing_cloud_provider_message(cloud_provider)
 
 def __get_cloud_resources(cloud_resources_request):
     """ Gets all resources from cloud providers"""
@@ -27,13 +32,13 @@ def __get_cloud_resources(cloud_resources_request):
         if cloud_provider in supported_cloud_providers:
             cloud_resources.append(supported_cloud_providers[cloud_provider].get_resources_from_cloud_provider(cloud_request))
         else:
-            logging.warning(f"Cloud provider {cloud_provider} is not supported")
+            logging.warning(missing_cloud_provider_message(cloud_provider))
 
     return cloud_resources
 
 def print_cloud_resources(cloud, subscription_id, output):
     if cloud not in supported_cloud_providers:
-        logging.warning(f"Cloud provider {cloud} is not supported")
+        logging.warning(missing_cloud_provider_message(cloud))
         return
 
     config.print_cloud_resources(__get_cloud_resources( __new_azure_request([subscription_id])), output)
