@@ -7,6 +7,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.resources.models import ResourceGroup
 from azure.core.exceptions import ResourceNotFoundError, ClientAuthenticationError
 from perf_decorator import timeit
+import attributes
 import azure_yaml
 
 SUBSCRIPTION_IDS = "subscription_ids"
@@ -86,32 +87,30 @@ def get_all_resources(credentials, subscription_id) -> list:
             resources.append(to_yaml(resource))
     return resources
 
+default_resource_attributes = {
+                    "name" : {},
+                    "type" : {},
+                     "location" : {},
+                     "tags" : { "ignore_if_empty": True },
+                     "managed_by" : { "ignore_if_empty": True }
+                    }
+
 def to_yaml(azure_resource):
     azure_resource_type = azure_resource.type
     try:
         return to_yaml_by_type(azure_resource)
     except ModuleNotFoundError:
         logging.warn(f"Azure resource type '{azure_resource_type}' is not fully supported yet")
-        return to_yaml_as_generic(azure_resource)
+        return attributes.object_as_yaml(azure_resource, default_resource_attributes)
 
 def to_yaml_by_type(azure_resource):
     azure_resource_type = azure_resource.type
     module_name = azure_resource_type.replace("/",".")
     azure_resource_type_module = importlib.import_module("." + module_name, "cloud.azure")
-    as_yaml = getattr(azure_resource_type_module,"as_yaml")
-    return as_yaml(azure_resource)
+    yaml_attributes = getattr(azure_resource_type_module,"yaml_attributes")
+    return attributes.object_as_yaml(azure_resource, yaml_attributes)
 
-def to_yaml_as_generic(azure_resource):
-    resource_as_yaml = { "id": azure_resource.id,
-                        "name": azure_resource.name,
-                        "type": azure_resource.type,
-                        "location": azure_resource.location,
-                        }
-    if azure_resource.tags:
-        resource_as_yaml["tags"] = azure_resource.tags
-    if azure_resource.managed_by:
-        resource_as_yaml["managed_by"] = azure_resource.managed_by
-    return resource_as_yaml
+
 
 @timeit
 def get_resources(credentials, subscription_id) -> dict:
