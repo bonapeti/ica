@@ -109,25 +109,25 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
         local_resources_dict = create_dict_from_resources_by_name(local_resources)
         remote_resource_dict = create_dict_from_resources_by_name(remote_resources)
 
-        local_keys = local_resources_dict.keys()
-        remote_keys = remote_resource_dict.keys()
+        resource_names_in_local_config_file = local_resources_dict.keys()
+        resource_names_in_cloud_provider = remote_resource_dict.keys()
 
-        common = local_keys & remote_keys
+        resource_names_in_local_and_cloud_provider = resource_names_in_local_config_file & resource_names_in_cloud_provider
 
-        only_local = local_keys ^ common
-        only_remote = remote_keys ^ common
+        only_local = resource_names_in_local_config_file ^ resource_names_in_local_and_cloud_provider
+        only_remote = resource_names_in_cloud_provider ^ resource_names_in_local_and_cloud_provider
 
         diff_list = []
-        for local_resource_key in only_local:
-            diff_list.append(create_only_local_resource(local_resources_dict[local_resource_key]))
+        for only_local_resource_name in only_local:
+            diff_list.append(create_only_local_resource(local_resources_dict[only_local_resource_name]))
 
-        for common_resource_key in common:
+        for common_resource_key in resource_names_in_local_and_cloud_provider:
             resource_diffs = __compare_resource(local_resources_dict[common_resource_key], remote_resource_dict[common_resource_key])
             if resource_diffs:
                 diff_list.append([ local_resources_dict[common_resource_key], resource_diffs, remote_resource_dict[common_resource_key]])
 
-        for remote_resource_key in only_remote:
-            diff_list.append(create_only_remote_resource(remote_resource_dict[remote_resource_key]))
+        for only_remote_resource_name in only_remote:
+            diff_list.append(create_only_remote_resource(remote_resource_dict[only_remote_resource_name]))
 
         return diff_list
 
