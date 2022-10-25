@@ -41,13 +41,14 @@ def diff(file):
             click.echo("No changes")
         else:
             click.echo("There are differences")
-            print_differences_with_tabular_format(differences)
+            click.echo("")
+            print_differences_with_tabular_format(differences, file)
 
-def print_differences_with_tabular_format(differences):
+def print_differences_with_tabular_format(differences, file_name):
     formatted = []
     for difference in differences:
         formatted.append([ get_resource_name(difference[0]), format_common(difference[1]), get_resource_name(difference[2])])
-    print(tabulate(formatted, headers=[bold("Local"), bold("Common"), bold("Remote")], tablefmt="simple", colalign=("left","center","right") ))
+    print(tabulate(formatted, headers=[bold(file_name), bold("Difference in properties"), bold("Cloud")], tablefmt="simple", colalign=("left","center","right") ))
 
 def bold(text):
     return "\033[1m" + text + "\033[0m"
