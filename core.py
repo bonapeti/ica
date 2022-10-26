@@ -160,6 +160,36 @@ def __compare_resource(local_resource, remote_resource):
 def resource_name(resource):
     return resource["name"]
 
+def apply_remote_changes(local_config):
+    differences = calculate_differences(local_config)
+
+    if not differences:
+        return None
+
+    for config in local_config:
+        for subscription in get_subscriptions(config):
+
+            local_resources = get_resources(subscription)
+            local_resources_dict = create_dict_from_resources_by_name(local_resources)
+
+            if differences:
+                for difference in differences:
+                    renote_resource_to_add = difference[2]
+                    if renote_resource_to_add:
+                        attribute_updates = difference[1]
+                        if attribute_updates:
+                            local_resorce_to_update = local_resources_dict[resource_name(renote_resource_to_add)]
+                            for attribute_name, attribute_change in attribute_updates.items():
+                                local_resorce_to_update[attribute_name] = attribute_change(1)
+                        else:
+                            local_resources_dict[resource_name(renote_resource_to_add)] = renote_resource_to_add
+
+                return local_config
+            return None
+
+
+
+
 def require(dict_object, key, error_message):
     if key not in dict_object:
         raise ValueError(error_message)

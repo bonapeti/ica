@@ -30,6 +30,10 @@ def load2(config_file):
     ruamel_yaml = YAML()
     return ruamel_yaml.load(config_file)
 
+def save2(ostream, yaml) -> None:
+    ruamel_yaml = YAML()
+    ruamel_yaml.dump(yaml, ostream)
+
 class AzureConfig:
 
     subscriptions = []

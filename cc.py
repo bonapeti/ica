@@ -44,6 +44,22 @@ def diff(file):
             click.echo("")
             print_differences_with_tabular_format(differences, file)
 
+@main.command()
+@click.option("-f","--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
+def pull(file):
+    """Updates local configuration with remote changes"""
+
+    logging.debug(f"Calling 'pull' command, parameters:\"-f {file}\"")
+    with config.open_file_for_read(file) as stream:
+        local_config = config.load2(stream)
+        modified_local_config = core.apply_remote_changes(local_config)
+        if not modified_local_config:
+            click.echo("No changes")
+        else:
+            with config.open_file_for_write(file) as stream:
+                config.save2(stream, modified_local_config)
+                click.echo(f"Updated {file}")
+
 def print_differences_with_tabular_format(differences, file_name):
     formatted = []
     for difference in differences:
@@ -62,7 +78,6 @@ def format_common(diffs):
     common_as_string = []
     for name, diff in diffs.items():
         if diff[0] and not diff[1]:
-
             common_as_string.append(textwrap.shorten(f"{bold(name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
         elif not diff[0] and diff[1]:
             common_as_string.append(textwrap.shorten(f"{bold(name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))

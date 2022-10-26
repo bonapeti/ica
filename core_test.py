@@ -83,3 +83,35 @@ def test_calculate_difference_2_local_1_remote():
     local_resource2 = { "name":"resource2" }
     remote_resource = { "name":"resource"}
     assert [core.create_only_local_resource(local_resource2) ] == core.__calculate_difference_between_resources([local_resource, local_resource2],[remote_resource])
+
+def test_apply_empty_remote_changes(monkeypatch):
+    def calculate_differences(local_config):
+        return []
+
+    monkeypatch.setattr(core, "calculate_differences", calculate_differences)
+    assert not core.apply_remote_changes([])
+
+def test_apply_remote_changes_with_only_local_changes(monkeypatch):
+    def calculate_differences(local_config):
+        return [ [ { "name" : "local_resource"},None, None] ]
+
+    monkeypatch.setattr(core, "calculate_differences", calculate_differences)
+    assert not core.apply_remote_changes([])
+
+def test_apply_remote_changes_with_only_local_changes(monkeypatch):
+    local_config = [{
+                                "cloud": "azure",
+                                "subscriptions": [
+                                        {
+                                            "id": "test_subscription_id",
+                                            "resources": []
+                                        }
+                                    ]
+                        }]
+
+    def calculate_differences(local_config):
+        return [ [ None ,None, { "name" : "remote_resource"}] ]
+
+    monkeypatch.setattr(core, "calculate_differences", calculate_differences)
+    new_config = core.apply_remote_changes(local_config)
+    assert new_config
