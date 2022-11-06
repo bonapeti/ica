@@ -4,12 +4,7 @@ def object_as_yaml(object, object_description):
   yaml = {}
   for attribute_name, attribute_description in object_description.items():
     value = getattr(object, attribute_name)
-    if value and not is_ignorable(attribute_description):
+    if value:
       yaml[attribute_name] = value
 
   return yaml
-
-
-
-def is_ignorable(description):
-  return description.get("ignore_if_empty", False)

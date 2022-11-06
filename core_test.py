@@ -78,6 +78,11 @@ def test_calculate_difference_same_resource_with_different_values_should_result_
     remote_resource = { "name":"resource", "value": "value2"}
     assert [ [ local_resource, { "value": ("value1","value2")}, remote_resource]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
+def test_calculate_difference_same_resource_with_tags_in_remote():
+
+    local_resource = { "name":"resource" }
+    remote_resource = { "name":"resource", "tags": { "name" : "value"}}
+    assert [ [ local_resource, { "tags": (None,{ "name" : "value"})}, remote_resource]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
 def test_calculate_difference_1_local_2_remote():
 
