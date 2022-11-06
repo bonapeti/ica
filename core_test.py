@@ -11,7 +11,16 @@ class MockAzureCredential:
     def __exit__(self, a, b, c):
         pass
 
-
+def local_config_without_resources():
+    return [{
+                                "cloud": "azure",
+                                "subscriptions": [
+                                        {
+                                            "id": "test_subscription_id",
+                                            "resources": []
+                                        }
+                                    ]
+                        }]
 
 def test_get_resources(monkeypatch):
 
@@ -91,27 +100,22 @@ def test_apply_empty_remote_changes(monkeypatch):
     monkeypatch.setattr(core, "calculate_differences", calculate_differences)
     assert not core.apply_remote_changes([])
 
-def test_apply_remote_changes_with_only_local_changes(monkeypatch):
+
+
+def mock_differences(monkeypatch, differences):
     def calculate_differences(local_config):
-        return [ [ { "name" : "local_resource"},None, None] ]
+        return differences
 
     monkeypatch.setattr(core, "calculate_differences", calculate_differences)
-    assert not core.apply_remote_changes([])
 
 def test_apply_remote_changes_with_only_local_changes(monkeypatch):
-    local_config = [{
-                                "cloud": "azure",
-                                "subscriptions": [
-                                        {
-                                            "id": "test_subscription_id",
-                                            "resources": []
-                                        }
-                                    ]
-                        }]
 
-    def calculate_differences(local_config):
-        return [ [ None ,None, { "name" : "remote_resource"}] ]
+    mock_differences(monkeypatch, [ [ { "name" : "local_resource"},None, None] ])
+    assert not core.apply_remote_changes(local_config_without_resources())
 
-    monkeypatch.setattr(core, "calculate_differences", calculate_differences)
-    new_config = core.apply_remote_changes(local_config)
+def test_apply_remote_changes_with_only_local_changes(monkeypatch):
+
+    mock_differences(monkeypatch, [ [ None ,None, { "name" : "remote_resource"}] ])
+
+    new_config = core.apply_remote_changes(local_config_without_resources())
     assert new_config
