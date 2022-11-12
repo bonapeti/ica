@@ -180,7 +180,7 @@ def apply_remote_changes(local_config):
                         if attribute_updates:
                             local_resorce_to_update = local_resources_dict[resource_name(renote_resource_to_add)]
                             for attribute_name, attribute_change in attribute_updates.items():
-                                local_resorce_to_update[attribute_name] = attribute_change(1)
+                                local_resorce_to_update[attribute_name] = attribute_change[1]
                         else:
                             local_resources.append(renote_resource_to_add)
 
