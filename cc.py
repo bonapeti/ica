@@ -1,11 +1,12 @@
-from re import S
-import sys
 import logging
-import click
-import core
-import config
-from tabulate import tabulate
+import sys
 import textwrap
+
+import click
+from tabulate import tabulate
+
+import config
+import core
 
 DEFAULT_FILENAME = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
@@ -20,8 +21,8 @@ def main(debug = False):
         logging.basicConfig(level=logging.DEBUG)
 
 @main.command()
-@click.option("-c","--cloud", required=True, type=click.Choice(['azure']), help="Supported cloud providers: 'azure'")
-@click.option("-s","--subscription_id", required=True, help="Subscription ID")
+@click.option("-c", "--cloud", required=True, type=click.Choice(['azure']), help="Supported cloud providers: 'azure'")
+@click.option("-s", "--subscription_id", required=True, help="Subscription ID")
 def show(cloud, subscription_id):
     """Prints cloud resource descriptions to stdout as YAML"""
 
@@ -30,7 +31,7 @@ def show(cloud, subscription_id):
 
 
 @main.command()
-@click.option("-f","--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
+@click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
 def diff(file):
     """Shows differences between local and remote resources"""
 
@@ -45,7 +46,7 @@ def diff(file):
             print_differences_with_tabular_format(differences, file)
 
 @main.command()
-@click.option("-f","--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
+@click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
 def pull(file):
     """Updates local configuration with remote changes"""
 
