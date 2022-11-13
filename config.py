@@ -1,10 +1,6 @@
 import logging
 from ruamel.yaml import YAML
-import cloud.azure.api
 from tabulate import tabulate
-import azure_yaml
-
-SUPPORTED_PROVIDERS=[azure_yaml.AZURE]
 
 def print_cloud_resources(cloud_resources, output) -> None:
     ruamel_yaml = YAML()

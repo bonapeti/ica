@@ -1,7 +1,6 @@
 import logging
 import pytest
 import api
-import azure_yaml
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,7 +15,7 @@ def login():
 def resource_group(login):
     api.delete_resource_group(login, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP)
     api.update_resource_group(login, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, resource_group={
-            azure_yaml.YAML_AZURE_RESOURCE_LOCATION: "northeurope"
+            api.YAML_AZURE_RESOURCE_LOCATION: "northeurope"
         })
     yield TEST_RESOURCE_GROUP
     api.delete_resource_group(login, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP)

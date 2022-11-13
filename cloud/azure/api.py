@@ -8,7 +8,10 @@ from azure.mgmt.resource.resources.models import ResourceGroup
 from azure.core.exceptions import ResourceNotFoundError, ClientAuthenticationError
 from perf_decorator import timeit
 import attributes
-import azure_yaml
+
+YAML_RESOURCES="resources"
+YAML_AZURE_RESOURCE_NAME="name"
+YAML_AZURE_RESOURCE_LOCATION="location"
 
 SUBSCRIPTION_IDS = "subscription_ids"
 MISSING_SUBSCRIPTION_ID = "Missing subscription ID"
@@ -120,11 +123,11 @@ def get_resources(credentials, subscription_id) -> dict:
     result={}
     with ResourceManagementClient(credentials, subscription_id) as resource_client:
         for resource_group in list(resource_client.resource_groups.list()):
-            result[resource_group.name] = { azure_yaml.YAML_AZURE_RESOURCE_NAME: resource_group.name, azure_yaml.YAML_AZURE_RESOURCE_LOCATION: resource_group.location }
+            result[resource_group.name] = { YAML_AZURE_RESOURCE_NAME: resource_group.name, YAML_AZURE_RESOURCE_LOCATION: resource_group.location }
             resources = {}
-            result[resource_group.name][azure_yaml.YAML_RESOURCES] = resources
+            result[resource_group.name][YAML_RESOURCES] = resources
             for resource in __get_resources_in_resource_group(resource_client, resource_group.name):
-                resources[resource.name] = { azure_yaml.YAML_AZURE_RESOURCE_NAME: resource.name }
+                resources[resource.name] = { YAML_AZURE_RESOURCE_NAME: resource.name }
     return result
 
 def __get_resources_in_resource_group(resource_client: ResourceManagementClient,
@@ -140,11 +143,11 @@ def update_resource_group(credentials, subscription_id, resource_group_name: str
     assert subscription_id, "Missing subscription ID"
     assert resource_group_name, "Missing resource group name"
     assert resource_group, "Missing resource group"
-    assert resource_group[azure_yaml.YAML_AZURE_RESOURCE_LOCATION], "Missing resource group location"
-    validate_location(resource_group[azure_yaml.YAML_AZURE_RESOURCE_LOCATION])
+    assert resource_group[YAML_AZURE_RESOURCE_LOCATION], "Missing resource group location"
+    validate_location(resource_group[YAML_AZURE_RESOURCE_LOCATION])
 
     with ResourceManagementClient(credentials, subscription_id) as resource_client:
-        azure_resource_group = ResourceGroup(location=resource_group[azure_yaml.YAML_AZURE_RESOURCE_LOCATION],
+        azure_resource_group = ResourceGroup(location=resource_group[YAML_AZURE_RESOURCE_LOCATION],
                                             name=resource_group_name,
                                             properties={
 
