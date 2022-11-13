@@ -38,23 +38,5 @@ def save_yaml(yaml, ostream) -> None:
     ruamel_yaml = YAML()
     ruamel_yaml.dump(yaml, ostream)
 
-class Resource:
-
-    name = None
-    azure_resource = None
-
-    def __init__(self, name, azure_resource):
-        self.name = name
-        self.azure_resource = azure_resource
-
-    def __str__(self):
-        return self.name
-
-    def as_yaml(self):
-        return azure_resource_as_yaml(self.azure_resource)
-
-def load_resource_from_yaml(name, resource_yaml) -> Resource:
-    return Resource(name, resource_yaml)
-
 def azure_resource_as_yaml(azure_resource) -> dict:
     return azure_resource
