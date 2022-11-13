@@ -77,13 +77,13 @@ def format_common(diffs):
 
     assert isinstance(diffs, dict), "Expecting dict"
     common_as_string = []
-    for name, diff in diffs.items():
+    for resource_name, diff in diffs.items():
         if diff[0] and not diff[1]:
-            common_as_string.append(textwrap.shorten(f"{bold(name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
+            common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
         elif not diff[0] and diff[1]:
-            common_as_string.append(textwrap.shorten(f"{bold(name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))
+            common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))
         elif diff[0] and diff[1]:
-            common_as_string.append(textwrap.shorten(f"{bold(name)}: {diff[0]} <=> {diff[1]}", width=FIXED_WIDTH))
+            common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> {diff[1]}", width=FIXED_WIDTH))
     return "\n".join(common_as_string)
 
 def get_resource_name(resource):
