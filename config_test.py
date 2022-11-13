@@ -26,37 +26,6 @@ TEST_YAML=f"""\
         resources: {{}}
 """
 
-def test_not_supported_provider(cli_runner):
-    with pytest.raises(ValueError):
-        config.load_yaml("""\
-- cloud: unknown_cloud
-""")
-
-def test_load_azure_subscription_from_valid_yaml(cli_runner):
-    azure_config = config.load_yaml(TEST_YAML)
-
-    assert len(azure_config.subscriptions) == 1
-
-    subscription = azure_config.subscriptions[0]
-    assert subscription.id == TEST_SUBSCRIPTION_ID
-
-def test_load_resource_groups_from_valid_yaml(cli_runner):
-    azure_config = config.load_yaml(TEST_YAML)
-
-    subscription = azure_config.subscriptions[0]
-    assert len(subscription.resource_groups) == 2, "Should have at least 2 resource group loaded"
-
-def test_load_resources_from_valid_yaml(cli_runner):
-    azure_config = config.load_yaml(TEST_YAML)
-
-    subscription = azure_config.subscriptions[0]
-    assert len(subscription.resource_groups["NetworkWatcherRG"].resources) == 2, "Should have at least 2 resource loaded"
-
-def test_azure_config_as_yaml(cli_runner):
-    azure_config = config.AzureConfig([])
-    assert [ {"cloud":azure_yaml.AZURE, azure_yaml.YAML_SUBSCRIPTION_LIST: []}] == azure_config.as_yaml()
-
-
 def test_empty_subscription_as_yaml(cli_runner):
     subscription = config.AzureSubscription({azure_yaml.YAML_SUBSCRIPTION_ID: "id"})
     result = subscription.as_yaml()

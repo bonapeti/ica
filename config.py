@@ -34,64 +34,9 @@ def save2(ostream, yaml) -> None:
     ruamel_yaml = YAML()
     ruamel_yaml.dump(yaml, ostream)
 
-class AzureConfig:
-
-    subscriptions = []
-
-    def __init__(self, subscriptions):
-        self.subscriptions = subscriptions
-
-    def update_from_remote(self, credential) -> None:
-        for subscription in self.subscriptions:
-            subscription.update_from_remote(credential)
-
-    def compare_with_remote(self, credential, output) -> None:
-        for subscription in self.subscriptions:
-            subscription.compare_with_remote(credential, output)
-
-    def push(self, credential) -> None:
-        for subscription in self.subscriptions:
-            subscription.push(credential)
-
-    def as_yaml(self):
-        return [ {
-                    "cloud": azure_yaml.AZURE,
-                    azure_yaml.YAML_SUBSCRIPTION_LIST: [ subscription.as_yaml() for subscription in self.subscriptions]
-                 } ]
-
-
 def save_yaml(yaml, ostream) -> None:
     ruamel_yaml = YAML()
     ruamel_yaml.dump(yaml, ostream)
-
-def new_azure_config(subscription_id: str) -> AzureConfig:
-    output_yaml=f"""\
-- cloud: {azure_yaml.AZURE}
-  subscriptions:
-  - {azure_yaml.YAML_SUBSCRIPTION_ID}: {subscription_id}
-"""
-    return load_yaml(output_yaml)
-
-def load_yaml(source) -> AzureConfig:
-    ruamel_yaml = YAML()
-    yaml = ruamel_yaml.load(source)
-
-    not_supported_providers = {provider.get("cloud","") for provider in yaml if provider.get("cloud","") not in SUPPORTED_PROVIDERS }
-    for not_supported in not_supported_providers:
-        logging.warning(f"Cloud provider '{not_supported}' is not supported")
-
-    azure_providers = [provider for provider in yaml if azure_yaml.AZURE == provider.get("cloud","")]
-    if len(azure_providers) == 0:
-        raise ValueError("Missing Azure tenant")
-
-    if len(azure_providers) > 1:
-        raise ValueError("More than one Azure tenant defined, only one expected!")
-
-    azure_cloud = azure_providers[0]
-
-    assert azure_cloud[azure_yaml.YAML_SUBSCRIPTION_LIST], f"Missing '{azure_yaml.YAML_SUBSCRIPTION_LIST}' under azure cloud configuration"
-
-    return AzureConfig(list(map(load_subscription, azure_cloud[azure_yaml.YAML_SUBSCRIPTION_LIST])))
 
 def load_resource_group_from_yaml(name, resource_group_yaml):
     assert name, "Missing resource group name"
