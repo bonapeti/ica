@@ -25,13 +25,3 @@ TEST_YAML=f"""\
         location: {TEST_LOCATION_NORTH_EUROPE}
         resources: {{}}
 """
-
-class MockClick:
-    test_output = io.StringIO()
-
-    def echo(self, message):
-        self.test_output.write(message)
-        self.test_output.write("\n")
-
-    def get_content(self):
-        return self.test_output.getvalue()
