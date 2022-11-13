@@ -1,5 +1,4 @@
-from cc import main, DEFAULT_FILENAME
-import core
+from ica import main, DEFAULT_FILENAME
 import config
 import cloud.azure.api
 
