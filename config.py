@@ -38,49 +38,6 @@ def save_yaml(yaml, ostream) -> None:
     ruamel_yaml = YAML()
     ruamel_yaml.dump(yaml, ostream)
 
-def load_resource_group_from_yaml(name, resource_group_yaml):
-    assert name, "Missing resource group name"
-    assert resource_group_yaml, f"Missing YAML definition for resource group {name}"
-    assert azure_yaml.YAML_AZURE_RESOURCE_LOCATION in resource_group_yaml, f"Missing resource group location for resource group {name}"
-
-    resource_group = ResourceGroup(name, resource_group_yaml[azure_yaml.YAML_AZURE_RESOURCE_LOCATION])
-
-    if azure_yaml.YAML_RESOURCES in resource_group_yaml:
-        resources_yaml = resource_group_yaml[azure_yaml.YAML_RESOURCES]
-        assert isinstance(resources_yaml, dict), "Expecting dict of resources yaml definitions"
-        for name, resource_yaml in resources_yaml.items():
-            resource_group.add_resource(load_resource_from_yaml(name, resource_yaml))
-
-
-    return resource_group
-
-
-
-class ResourceGroup:
-
-    name = None
-    resources = {}
-    location = None
-
-    def __init__(self, name, location):
-        self.name = name
-        self.resources = {}
-        self.location = location
-
-    def add_resource(self, azure_resource):
-        self.resources[azure_resource.name] = azure_resource
-
-    def as_yaml(self):
-        return { azure_yaml.YAML_AZURE_RESOURCE_LOCATION: self.location, azure_yaml.YAML_RESOURCES: { name: resource.as_yaml() for name, resource in self.resources.items()} }
-
-    def push(self, credentials, subscription_id) -> None:
-        cloud.azure.api.update_resource_group(credentials, subscription_id, self.name, resource_group={
-            azure_yaml.YAML_AZURE_RESOURCE_LOCATION: self.location
-        })
-
-    def __str__(self):
-        return self.name
-
 class Resource:
 
     name = None

@@ -71,49 +71,6 @@ def test_azure_resource_as_yaml(cli_runner):
                         azure_yaml.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
                         azure_yaml.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }
 
-def test_empty_azure_resource_group_as_yaml(cli_runner):
-    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP, TEST_LOCATION_NORTH_EUROPE )
-    assert azure_resource_group.as_yaml() == { azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
-                                                azure_yaml.YAML_RESOURCES: {} }
-
-def test_azure_resource_group_with_resource_as_yaml(cli_runner):
-    azure_resource_group = config.ResourceGroup(TEST_RESOURCE_GROUP, TEST_LOCATION_NORTH_EUROPE)
-    resource = MockAzureResource()
-    azure_resource_group.add_resource(resource)
-    assert azure_resource_group.as_yaml() == { azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
-                                                azure_yaml.YAML_RESOURCES: {
-                                                MockAzureResource.name: MockAzureResource.yaml
-                                            }}
-
-
-def test_update_subscription_from_remote():
-
-    resource = MockAzureResource()
-
-    def mock_get_resources(credentials, subscription_id):
-        return { TEST_RESOURCE_GROUP: { azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,  azure_yaml.YAML_RESOURCES: { MockAzureResource.name: {  }} },
-                ANOTHER_RESOURCE_GROUP: {azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,  azure_yaml.YAML_RESOURCES: {} }}
-
-    subscription = config.AzureSubscription({ azure_yaml.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID })
-    subscription.update_from_remote(None, mock_get_resources)
-
-    assert subscription.as_yaml() == { azure_yaml.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID,
-             azure_yaml.YAML_RESOURCE_GROUPS:
-                {
-                  TEST_RESOURCE_GROUP:
-                  { azure_yaml.YAML_AZURE_RESOURCE_LOCATION:
-                        TEST_LOCATION_NORTH_EUROPE,
-                    azure_yaml.YAML_RESOURCES:
-                    { MockAzureResource.name: {} }
-                  },
-                  ANOTHER_RESOURCE_GROUP:
-                  { azure_yaml.YAML_AZURE_RESOURCE_LOCATION:
-                        TEST_LOCATION_NORTH_EUROPE,
-                    azure_yaml.YAML_RESOURCES:
-                    {}
-                  }
-                }
-            }
 
 def test_compare_subscription_with_1_remote_resource():
 
