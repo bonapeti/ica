@@ -12,7 +12,7 @@ DEFAULT_FILENAME = "infrastructure.yaml"
 CONFIG_FILE_HELP="YAML file describing infrastructure"
 
 @click.group()
-@click.version_option(version="0.1.0")
+@click.version_option(version="0.2.0")
 @click.option('--debug/--no-debug', default=False)
 def main(debug = False):
     """Manages cloud resources with YAML code"""
