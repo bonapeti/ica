@@ -26,14 +26,6 @@ TEST_YAML=f"""\
         resources: {{}}
 """
 
-def test_empty_subscription_as_yaml(cli_runner):
-    subscription = config.AzureSubscription({azure_yaml.YAML_SUBSCRIPTION_ID: "id"})
-    result = subscription.as_yaml()
-    assert { azure_yaml.YAML_SUBSCRIPTION_ID: "id",
-               azure_yaml.YAML_RESOURCE_GROUPS: {}} == result
-
-
-
 class MockAzureResource:
     name =  "AzureResource"
     type = "AzureResourceType"
@@ -70,18 +62,3 @@ def test_azure_resource_as_yaml(cli_runner):
                         azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
                         azure_yaml.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
                         azure_yaml.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }
-
-
-def test_compare_subscription_with_1_remote_resource():
-
-    resource = MockAzureResource()
-
-    def mock_get_resources(credentials, subscription_id):
-        return { TEST_RESOURCE_GROUP: { azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,  azure_yaml.YAML_RESOURCES: { resource}} }
-
-    subscription = config.AzureSubscription({ azure_yaml.YAML_SUBSCRIPTION_ID: TEST_SUBSCRIPTION_ID })
-    mock_click = MockClick()
-
-    subscription.compare_with_remote(None, mock_click, mock_get_resources)
-
-    assert mock_click.get_content().startswith(f"Azure subscription '{TEST_SUBSCRIPTION_ID}'\nThere are differences")
