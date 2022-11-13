@@ -37,6 +37,3 @@ def save2(ostream, yaml) -> None:
 def save_yaml(yaml, ostream) -> None:
     ruamel_yaml = YAML()
     ruamel_yaml.dump(yaml, ostream)
-
-def azure_resource_as_yaml(azure_resource) -> dict:
-    return azure_resource

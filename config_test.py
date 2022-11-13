@@ -26,23 +26,6 @@ TEST_YAML=f"""\
         resources: {{}}
 """
 
-class MockAzureResource:
-    name =  "AzureResource"
-    type = "AzureResourceType"
-    tags = { "name": "value"}
-    location = TEST_LOCATION_NORTH_EUROPE
-    kind = None
-    identity = None
-    managed_by = None
-    resource_group_name = TEST_RESOURCE_GROUP
-    yaml = "MockResourceYaml"
-
-    def as_yaml(self):
-        return self.yaml
-
-class MockAzureResourceGroup:
-    name = TEST_RESOURCE_GROUP
-
 class MockClick:
     test_output = io.StringIO()
 
@@ -52,13 +35,3 @@ class MockClick:
 
     def get_content(self):
         return self.test_output.getvalue()
-
-def test_azure_resource_as_yaml(cli_runner):
-    azure_resource = MockAzureResource()
-    assert config.azure_resource_as_yaml({
-                        azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
-                        azure_yaml.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
-                        azure_yaml.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }) == {
-                        azure_yaml.YAML_AZURE_RESOURCE_LOCATION: TEST_LOCATION_NORTH_EUROPE,
-                        azure_yaml.YAML_AZURE_RESOURCE_TYPE: MockAzureResource.type,
-                        azure_yaml.YAML_AZURE_RESOURCE_TAGS: MockAzureResource.tags }
