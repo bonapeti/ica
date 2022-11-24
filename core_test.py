@@ -76,13 +76,13 @@ def test_calculate_difference_same_resource_with_different_values_should_result_
 
     local_resource = { "name":"resource", "value": "value1" }
     remote_resource = { "name":"resource", "value": "value2"}
-    assert [ [ local_resource, { "value": ("value1","value2")}, remote_resource]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
+    assert [ [ local_resource, { "value": ("value1","value2")}, remote_resource, core.NoDifference(), core.ResourceAttributeDifferences("resource", { "value": ("value1","value2")}), core.NoDifference()]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
 def test_calculate_difference_same_resource_with_tags_in_remote():
 
     local_resource = { "name":"resource" }
     remote_resource = { "name":"resource", "tags": { "name" : "value"}}
-    assert [ [ local_resource, { "tags": (None,{ "name" : "value"})}, remote_resource]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
+    assert [ [ local_resource, { "tags": (None,{ "name" : "value"})}, remote_resource, core.NoDifference(), core.ResourceAttributeDifferences("resource", { "tags": (None,{ "name" : "value"})}), core.NoDifference()]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
 def test_calculate_difference_1_local_2_remote():
 
@@ -115,12 +115,12 @@ def mock_differences(monkeypatch, differences):
 
 def test_apply_remote_changes_with_only_local_changes(monkeypatch):
 
-    mock_differences(monkeypatch, [ [ { "name" : "local_resource"},None, None] ])
+    mock_differences(monkeypatch, [ core.create_only_local_resource({ "name" : "local_resource"})])
     assert not core.apply_remote_changes(local_config_without_resources())
 
 def test_apply_remote_changes_with_only_local_changes(monkeypatch):
 
-    mock_differences(monkeypatch, [ [ None ,None, { "name" : "remote_resource"}] ])
+    mock_differences(monkeypatch, [ core.create_only_remote_resource({ "name" : "remote_resource"})])
 
     new_config = core.apply_remote_changes(local_config_without_resources())
     assert new_config

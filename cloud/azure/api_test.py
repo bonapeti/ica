@@ -20,6 +20,6 @@ def resource_group(login):
     yield TEST_RESOURCE_GROUP
     api.delete_resource_group(login, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP)
 
-
+@pytest.mark.skip(reason="Slow API test")
 def test_resource_group_api(login, resource_group, cli_runner):
     assert api.check_existence(login, TEST_SUBSCRIPTION_ID, resource_group), f"{resource_group} shoud exist"
