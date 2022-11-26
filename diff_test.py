@@ -8,9 +8,3 @@ def test_remote_diff():
     local_resources = []
     remote_difference.patch_local_config(local_resources)
     assert remote_resource == local_resources[0]
-
-def test_no_difference():
-    no_difference = core.NoDifference()
-    local_resources = []
-    no_difference.patch_local_config(local_resources)
-    assert 0 == len(local_resources)

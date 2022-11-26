@@ -76,13 +76,13 @@ def test_calculate_difference_same_resource_with_different_values_should_result_
 
     local_resource = { "name":"resource", "value": "value1" }
     remote_resource = { "name":"resource", "value": "value2"}
-    assert [ [ core.NoDifference(), core.ResourceAttributeDifferences("resource", { "value": ("value1","value2")}), core.NoDifference()]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
+    assert [ core.ResourceAttributeDifferences("resource", { "value": ("value1","value2")})] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
 def test_calculate_difference_same_resource_with_tags_in_remote():
 
     local_resource = { "name":"resource" }
     remote_resource = { "name":"resource", "tags": { "name" : "value"}}
-    assert [ [ core.NoDifference(), core.ResourceAttributeDifferences("resource", { "tags": (None,{ "name" : "value"})}), core.NoDifference()]] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
+    assert [ core.ResourceAttributeDifferences("resource", { "tags": (None,{ "name" : "value"})})] == core.__calculate_difference_between_resources([local_resource],[remote_resource])
 
 def test_calculate_difference_1_local_2_remote():
 
