@@ -33,7 +33,7 @@ steps:
 
 - script: |
     pip install pytest pytest-azurepipelines
-    pytest -v --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html core_test.py ica_test.py attributes_test.py
+    pytest -v --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html core_test.py ica_test.py attributes_test.py diff_test.py
   displayName: 'pytest'
 
 - task: PublishCodeCoverageResults@1
