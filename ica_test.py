@@ -53,7 +53,7 @@ def test_no_diff(cli_runner, monkeypatch):
 
 def test_diff_local_resource_added(cli_runner, monkeypatch):
 
-    mock_azure_resources(monkeypatch, [ "local_resource_group"])
+    mock_azure_resources(monkeypatch, [ {"name": "local_resource_group" } ])
 
     with cli_runner.isolated_filesystem():
         prepare_test_config_file()

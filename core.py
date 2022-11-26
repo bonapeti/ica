@@ -1,6 +1,7 @@
 import logging
 import importlib
 import config
+import textwrap
 
 supported_cloud_providers = {}
 
@@ -86,10 +87,10 @@ def get_resources(subscription):
     return []
 
 def create_only_local_resource(resource):
-    return [ resource, None, None, LocalOnlyResourceDifference(resource), NoDifference(), NoDifference() ]
+    return [ LocalOnlyResourceDifference(resource), NoDifference(), NoDifference() ]
 
 def create_only_remote_resource(resource):
-    return [ None, None, resource, NoDifference(), NoDifference(), RemoteOnlyResourceDifference(resource) ]
+    return [ NoDifference(), NoDifference(), RemoteOnlyResourceDifference(resource) ]
 
 def create_dict_from_resources_by_name(resource_list):
     return { resource_name(resource) : resource for resource in resource_list }
@@ -102,6 +103,12 @@ class NoDifference:
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, NoDifference)
 
+    def get_resource_name(self):
+        return None
+
+    def get_difference_report(self):
+        return ""
+
 class LocalOnlyResourceDifference:
 
     def __init__(self, local_resource) -> None:
@@ -109,6 +116,12 @@ class LocalOnlyResourceDifference:
 
     def __eq__(self, __o: object) -> bool:
         return self.local_resource == __o.local_resource
+
+    def get_resource_name(self):
+        return self.local_resource["name"]
+
+    def get_difference_report(self):
+        return ""
 
 class RemoteOnlyResourceDifference:
 
@@ -121,6 +134,16 @@ class RemoteOnlyResourceDifference:
 
     def patch_local_config( self, local_resources: list) -> None:
         local_resources.append(self.remote_resource)
+
+    def get_resource_name(self):
+        return self.remote_resource["name"]
+
+    def get_difference_report(self):
+        return ""
+
+FIXED_WIDTH = 100
+def bold(text):
+    return "\033[1m" + text + "\033[0m"
 
 class ResourceAttributeDifferences:
 
@@ -137,7 +160,19 @@ class ResourceAttributeDifferences:
         for attribute_name, attribute_change in self.attribute_differences.items():
             local_resorce_to_update[attribute_name] = attribute_change[1]
 
+    def get_resource_name(self):
+        return self.resource_name
 
+    def get_difference_report(self):
+        common_as_string = []
+        for resource_name, diff in self.attribute_differences.items():
+            if diff[0] and not diff[1]:
+                common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
+            elif not diff[0] and diff[1]:
+                common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))
+            elif diff[0] and diff[1]:
+                common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> {diff[1]}", width=FIXED_WIDTH))
+        return "\n".join(common_as_string)
 
 def __calculate_difference_between_resources(local_resources, remote_resources):
     logging.debug(f"Local resources: {local_resources}")
@@ -169,7 +204,7 @@ def __calculate_difference_between_resources(local_resources, remote_resources):
         for common_resource_key in resource_names_in_local_and_cloud_provider:
             resource_diffs = __compare_resource(local_resources_dict[common_resource_key], remote_resource_dict[common_resource_key])
             if resource_diffs:
-                diff_list.append([ local_resources_dict[common_resource_key], resource_diffs, remote_resource_dict[common_resource_key], NoDifference(), ResourceAttributeDifferences(common_resource_key, resource_diffs), NoDifference()])
+                diff_list.append([ NoDifference(), ResourceAttributeDifferences(common_resource_key, resource_diffs), NoDifference()])
 
         for only_remote_resource_name in only_remote:
             diff_list.append(create_only_remote_resource(remote_resource_dict[only_remote_resource_name]))
@@ -217,11 +252,11 @@ def apply_remote_changes(local_config):
             local_resources = get_resources(subscription)
 
             for resource_difference in resource_differences:
-                for difference in resource_difference[3:5]:
+                for difference in resource_difference:
                     difference.patch_local_config(local_resources)
             return local_config
 
-        return None
+    return None
 
 
 def require(dict_object, key, error_message):

@@ -64,36 +64,23 @@ def pull(file):
 def print_differences_with_tabular_format(differences, file_name):
     formatted = []
     for difference in differences:
-        formatted.append([ get_resource_name(difference[0]), format_common(difference[1]), get_resource_name(difference[2])])
+        formatted.append([ get_resource_name(difference[0]), difference[1].get_difference_report(), get_resource_name(difference[2])])
     print(tabulate(formatted, headers=[bold(file_name), bold("Difference in properties"), bold("Cloud")], tablefmt="simple", colalign=("left","center","right") ))
+
 
 def bold(text):
     return "\033[1m" + text + "\033[0m"
 
-FIXED_WIDTH = 100
-def format_common(diffs):
-    if not diffs:
-        return ""
 
-    assert isinstance(diffs, dict), "Expecting dict"
-    common_as_string = []
-    for resource_name, diff in diffs.items():
-        if diff[0] and not diff[1]:
-            common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
-        elif not diff[0] and diff[1]:
-            common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))
-        elif diff[0] and diff[1]:
-            common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> {diff[1]}", width=FIXED_WIDTH))
-    return "\n".join(common_as_string)
-
-def get_resource_name(resource):
-    if not resource:
+def get_resource_name(difference):
+    if not difference:
         return "(Missing)"
 
-    if "name" in resource:
-        return resource["name"]
-    else:
-        return ""
+    name = difference.get_resource_name()
+    if name:
+        return name
+    return ""
+
 
 if __name__ == '__main__':
     try:
