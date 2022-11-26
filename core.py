@@ -103,11 +103,12 @@ class LocalOnlyResourceDifference:
     def __eq__(self, __o: object) -> bool:
         return self.local_resource == __o.local_resource
 
+    def patch_local_config( self, local_resources: list) -> None:
+        """Does not change local configuration as this is already defined in local configuration"""
+        pass
+
     def get_resource_name(self):
         return self.local_resource["name"]
-
-    def get_difference_report(self):
-        return ""
 
 class RemoteOnlyResourceDifference:
 
@@ -123,9 +124,6 @@ class RemoteOnlyResourceDifference:
 
     def get_resource_name(self):
         return self.remote_resource["name"]
-
-    def get_difference_report(self):
-        return ""
 
 class ResourceAttributeDifferences:
 
