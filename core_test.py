@@ -105,8 +105,6 @@ def test_apply_empty_remote_changes(monkeypatch):
     monkeypatch.setattr(core, "calculate_differences", calculate_differences)
     assert not core.apply_remote_changes([])
 
-
-
 def mock_differences(monkeypatch, differences):
     def calculate_differences(local_config):
         return differences
