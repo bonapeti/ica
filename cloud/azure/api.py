@@ -122,6 +122,8 @@ def update_resource_group(credentials, subscription_id, resource_group_name: str
     assert resource_group[YAML_AZURE_RESOURCE_LOCATION], "Missing resource group location"
     validate_location(resource_group[YAML_AZURE_RESOURCE_LOCATION])
 
+    logging.debug(f"Updating resource group '{resource_group_name}' in subscription '{subscription_id}'")
+
     with ResourceManagementClient(credentials, subscription_id) as resource_client:
         azure_resource_group = ResourceGroup(location=resource_group[YAML_AZURE_RESOURCE_LOCATION],
                                             name=resource_group_name,
@@ -135,6 +137,8 @@ def delete_resource_group(credentials, subscription_id, resource_group_name, ign
     assert credentials, "Missing credentials"
     assert subscription_id, "Missing subscription ID"
     assert resource_group_name, "Missing resource group name"
+
+    logging.debug(f"Deleting resource group '{resource_group_name}' in subscription '{subscription_id}'")
 
     with ResourceManagementClient(credentials, subscription_id) as resource_client:
         try:

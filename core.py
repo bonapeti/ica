@@ -1,7 +1,6 @@
 import logging
 import importlib
 import config
-import textwrap
 
 supported_cloud_providers = {}
 
@@ -113,6 +112,9 @@ class LocalOnlyResourceDifference:
     def get_resource_name(self):
         return self.local_resource["name"]
 
+    def __hash__(self) -> int:
+        return self.remote_resource["name"].__hash__()
+
 class RemoteOnlyResourceDifference:
 
     def __init__(self, remote_resource) -> None:
@@ -125,8 +127,17 @@ class RemoteOnlyResourceDifference:
     def patch_local_config( self, local_resources: list) -> None:
         local_resources.append(self.remote_resource)
 
+    def update_remote_resources(self, subscription_id, cloud_provider):
+        cloud_provider.delete_resource(subscription_id, self.remote_resource)
+
     def get_resource_name(self):
         return self.remote_resource["name"]
+
+    def __hash__(self) -> int:
+        return self.remote_resource["name"].__hash__()
+
+    def __str__(self) -> str:
+        return f"Resource '{self.get_resource_name()}' exist only in cloud"
 
 class ResourceAttributeDifferences:
 
@@ -143,9 +154,18 @@ class ResourceAttributeDifferences:
         for attribute_name, attribute_change in self.attribute_differences.items():
             local_resorce_to_update[attribute_name] = attribute_change[1]
 
+    def update_remote_resources(self, subscription_id, cloud_provider):
+        logging.warning("Updating remote resources not supported")
+        #cloud_provider.update_resource(subscription_id, self.local_resource)
+
+    def __hash__(self) -> int:
+        return self.resource_name.__hash__()
+
     def get_resource_name(self):
         return self.resource_name
 
+    def __str__(self) -> str:
+        return f"Updating properties of '{self.resource_name}'"
 
 
 def __calculate_difference_between_resources(local_resources, remote_resources):
@@ -215,6 +235,8 @@ def resource_name(resource):
     return resource["name"]
 
 def apply_remote_changes(local_config):
+    """Calculates changes between local and remote configuration and updates local config with remote changes"""
+
     differences = calculate_differences(local_config)
 
     if not differences:
@@ -232,11 +254,14 @@ def apply_remote_changes(local_config):
     return None
 
 def apply_local_changes(local_config):
+    """Calculates changes between local and remote configuration and pushes local changes to cloud"""
 
     differences = calculate_differences(local_config)
 
     if not differences:
         return None
+
+    change_results = {}
 
     for config in local_config:
         for subscription in get_subscriptions(config):
@@ -244,10 +269,13 @@ def apply_local_changes(local_config):
 
 
             for difference in differences:
-                difference.update_remote_resources(get_id(subscription), supported_cloud_providers[cloud_provider])
-                return local_config
+                try:
+                    difference.update_remote_resources(get_id(subscription), supported_cloud_providers[cloud_provider])
+                    change_results[difference] = "Success"
+                except Exception as error:
+                    change_results[difference] = f"Failed, because: {str(error)}"
 
-    return None
+    return change_results
 
 def require(dict_object, key, error_message):
     if key not in dict_object:

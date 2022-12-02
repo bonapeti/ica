@@ -69,17 +69,16 @@ def push(file):
     logging.debug(f"Calling 'push' command, parameters:\"-f {file}\"")
     with config.open_file_for_read(file) as stream:
         local_config = config.load2(stream)
-        modified_local_config = core.apply_local_changes(local_config)
-        if not modified_local_config:
-            click.echo("No changes")
-        else:
-            click.echo("Successfull changes")
+        change_results = core.apply_local_changes(local_config)
+
+        for change, result in change_results.items():
+            print(f"{change}: {result}")
 
 def print_differences_with_tabular_format(differences, file_name):
     formatted = []
     for difference in differences:
         formatted.append([display_change_in_local_config(difference), display_attribute_differences(difference), display_change_in_remote_config(difference)])
-    print(tabulate(formatted, headers=[bold(file_name), bold("Difference in properties"), bold("Cloud")], tablefmt="simple", colalign=("left","center","right") ))
+    print(tabulate(formatted, headers=[bold(file_name), bold("Property differences"), bold("Cloud")], tablefmt="simple", colalign=("left","center","right") ))
 
 
 FIXED_WIDTH = 100
