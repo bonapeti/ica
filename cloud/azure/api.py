@@ -122,14 +122,11 @@ def update_resource_group(credentials, subscription_id, resource_group_name: str
     assert resource_group[YAML_AZURE_RESOURCE_LOCATION], "Missing resource group location"
     validate_location(resource_group[YAML_AZURE_RESOURCE_LOCATION])
 
-    logging.debug(f"Updating resource group '{resource_group_name}' in subscription '{subscription_id}'")
+    logging.debug(f"Updating resource group '{resource_group_name}' in subscription '{subscription_id}' with {resource_group}")
 
     with ResourceManagementClient(credentials, subscription_id) as resource_client:
         azure_resource_group = ResourceGroup(location=resource_group[YAML_AZURE_RESOURCE_LOCATION],
-                                            name=resource_group_name,
-                                            properties={
-
-                                            })
+                                            properties=resource_group)
         resource_client.resource_groups.create_or_update(resource_group_name, parameters = azure_resource_group)
 
 @timeit

@@ -137,7 +137,7 @@ class RemoteOnlyResourceDifference:
         return self.remote_resource["name"].__hash__()
 
     def __str__(self) -> str:
-        return f"Resource '{self.get_resource_name()}' exist only in cloud"
+        return f"Deleting resource group '{self.get_resource_name()}'"
 
 class ResourceAttributeDifferences:
 
@@ -155,8 +155,10 @@ class ResourceAttributeDifferences:
             local_resorce_to_update[attribute_name] = attribute_change[1]
 
     def update_remote_resources(self, subscription_id, cloud_provider):
-        logging.warning("Updating remote resources not supported")
-        #cloud_provider.update_resource(subscription_id, self.local_resource)
+        local_resource = { "name": self.resource_name}
+        for attribute_name, attribute_change in self.attribute_differences.items():
+            local_resource[attribute_name] = attribute_change[0]
+        cloud_provider.update_resource(subscription_id, local_resource)
 
     def __hash__(self) -> int:
         return self.resource_name.__hash__()
