@@ -107,6 +107,9 @@ class LocalOnlyResourceDifference:
         """Does not change local configuration as this is already defined in local configuration"""
         pass
 
+    def update_remote_resources(self, subscription_id, cloud_provider):
+        cloud_provider.create_new_resource(subscription_id, self.local_resource)
+
     def get_resource_name(self):
         return self.local_resource["name"]
 
@@ -228,6 +231,23 @@ def apply_remote_changes(local_config):
 
     return None
 
+def apply_local_changes(local_config):
+
+    differences = calculate_differences(local_config)
+
+    if not differences:
+        return None
+
+    for config in local_config:
+        for subscription in get_subscriptions(config):
+            cloud_provider = get_cloud_type(config)
+
+
+            for difference in differences:
+                difference.update_remote_resources(get_id(subscription), supported_cloud_providers[cloud_provider])
+                return local_config
+
+    return None
 
 def require(dict_object, key, error_message):
     if key not in dict_object:

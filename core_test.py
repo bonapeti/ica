@@ -1,29 +1,30 @@
 import core
 import cloud.azure.api
+from contextlib import contextmanager
 
-class MockAzureCredential:
-    def __init__(self):
-        pass
+MOCK_CREDENTIAL_ID="azure_credential"
 
-    def __enter__(self):
-        return "login"
-
-    def __exit__(self, a, b, c):
-        pass
+@contextmanager
+def mock_azure_login():
+    yield MOCK_CREDENTIAL_ID
 
 def local_config_without_resources():
+    return local_config("test_subscription_id",[])
+
+def local_config(subscription_id, resources):
     return [{
                                 "cloud": "azure",
                                 "subscriptions": [
                                         {
-                                            "id": "test_subscription_id",
-                                            "resources": []
+                                            "id": subscription_id,
+                                            "resources": resources
                                         }
                                     ]
                         }]
 
 def test_get_resources(monkeypatch):
 
+    login_id = "login_id"
     test_subscription_id = "subscription_id"
     expected_resources = [{
                                 "cloud": "azure",
@@ -40,10 +41,7 @@ def test_get_resources(monkeypatch):
         assert subscription_id == test_subscription_id
         return []
 
-    def azure_login():
-        return MockAzureCredential()
-
-    monkeypatch.setattr(cloud.azure.api, "login", azure_login)
+    monkeypatch.setattr(cloud.azure.api, "login", mock_azure_login)
     monkeypatch.setattr(cloud.azure.api, "get_all_resources", get_all_resources)
 
     assert expected_resources == core.__get_cloud_resources([ { "cloud": "azure", cloud.azure.api.SUBSCRIPTION_IDS: [ test_subscription_id]}])
@@ -122,3 +120,48 @@ def test_apply_remote_changes_with_only_local_changes(monkeypatch):
 
     new_config = core.apply_remote_changes(local_config_without_resources())
     assert new_config
+
+class MockResourceGroupUpdate:
+
+    expected_subscription_id = None
+    expected_resource_group_name = None
+    expected_resource_group = None
+
+    actual_credentials = None
+    actual_subscription_id = None
+    actual_resource_group_name = None
+    actual_resource_group = None
+
+    def __init__(self, expected_subscription_id, expected_resource_group_name, expected_resource_group ):
+        self.expected_subscription_id = expected_subscription_id
+        self.expected_resource_group_name = expected_resource_group_name
+        self.expected_resource_group = expected_resource_group
+
+    def verify(self):
+        assert MOCK_CREDENTIAL_ID == self.actual_credentials
+        assert self.expected_subscription_id == self.actual_subscription_id
+        assert self.expected_resource_group_name == self.actual_resource_group_name
+        assert self.expected_resource_group == self.actual_resource_group
+
+
+
+def test_apply_remote_changes_with_only_local_changes(monkeypatch):
+
+    subscription = "test_subscription"
+    new_resource = { "name" : "local_resource"}
+
+    expected_resource_group_update = MockResourceGroupUpdate(subscription, "local_resource", new_resource)
+
+    def update_resource_group(credentials, subscription_id, resource_group_name: str, resource_group: dict):
+        expected_resource_group_update.actual_credentials = credentials
+        expected_resource_group_update.actual_subscription_id = subscription_id
+        expected_resource_group_update.actual_resource_group_name = resource_group_name
+        expected_resource_group_update.actual_resource_group = resource_group
+
+
+    monkeypatch.setattr(cloud.azure.api, "login", mock_azure_login)
+    monkeypatch.setattr(cloud.azure.api, "update_resource_group", update_resource_group)
+
+    mock_differences(monkeypatch, [ core.create_only_local_resource(new_resource)])
+    assert core.apply_local_changes(local_config(subscription, [new_resource]))
+    expected_resource_group_update.verify()

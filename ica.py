@@ -61,6 +61,20 @@ def pull(file):
                 config.save2(stream, modified_local_config)
                 click.echo(f"Updated {file}")
 
+@main.command()
+@click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
+def push(file):
+    """Updates remote cloud resources with differences found in local config"""
+
+    logging.debug(f"Calling 'push' command, parameters:\"-f {file}\"")
+    with config.open_file_for_read(file) as stream:
+        local_config = config.load2(stream)
+        modified_local_config = core.apply_local_changes(local_config)
+        if not modified_local_config:
+            click.echo("No changes")
+        else:
+            click.echo("Successfull changes")
+
 def print_differences_with_tabular_format(differences, file_name):
     formatted = []
     for difference in differences:

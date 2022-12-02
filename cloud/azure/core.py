@@ -17,3 +17,7 @@ def get_resources_from_cloud_provider(cloud_request):
                                 "resources": cloud.azure.api.get_all_resources(credential, subscription_id)})
 
     return cloud_resource
+
+def create_new_resource(subscription_id, new_resoure):
+    with cloud.azure.api.login() as credential:
+        cloud.azure.api.update_resource_group(credential, subscription_id, new_resoure["name"], new_resoure)
