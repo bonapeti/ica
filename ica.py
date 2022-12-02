@@ -64,7 +64,7 @@ def pull(file):
 @main.command()
 @click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
 def push(file):
-    """Updates remote cloud resources with differences found in local config"""
+    """Updates resources in cloud with changes in local configuration"""
 
     logging.debug(f"Calling 'push' command, parameters:\"-f {file}\"")
     with config.open_file_for_read(file) as stream:
