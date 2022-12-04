@@ -113,7 +113,7 @@ class LocalOnlyResourceDifference:
         return self.local_resource["name"]
 
     def __hash__(self) -> int:
-        return self.remote_resource["name"].__hash__()
+        return self.local_resource["name"].__hash__()
 
 class RemoteOnlyResourceDifference:
 
