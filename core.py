@@ -170,7 +170,8 @@ class ResourceAttributeDifferences:
         return f"Updating properties of '{self.resource_name}'"
 
 
-def __calculate_difference_between_resources(local_resources, remote_resources):
+def __calculate_difference_between_resources(local_resources: list, remote_resources: list) -> list:
+    """Calculates the differences between the list of resources in local configuration and remote resources"""
     logging.debug(f"Local resources: {local_resources}")
     logging.debug(f"Remote resources: {remote_resources}")
 
