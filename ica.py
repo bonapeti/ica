@@ -1,9 +1,8 @@
 import logging
 import sys
-import textwrap
+import output_format
 
 import click
-from tabulate import tabulate
 
 import config
 import core
@@ -43,7 +42,7 @@ def diff(file):
         else:
             click.echo("There are differences")
             click.echo("")
-            print_differences_with_tabular_format(differences, file)
+            output_format.print_as_table(sys.stdout, differences, file, "Cloud")
 
 @main.command()
 @click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
@@ -73,51 +72,6 @@ def push(file):
 
         for change, result in change_results.items():
             print(f"{change}: {result}")
-
-def print_differences_with_tabular_format(differences, file_name):
-    formatted = []
-    for difference in differences:
-        formatted.append([display_change_in_local_config(difference), display_attribute_differences(difference), display_change_in_remote_config(difference)])
-    print(tabulate(formatted, headers=[bold(file_name), bold("Property differences"), bold("Cloud")], tablefmt="simple", colalign=("left","center","right") ))
-
-
-FIXED_WIDTH = 100
-def bold(text):
-    return "\033[1m" + text + "\033[0m"
-
-
-def display_change_in_local_config(difference):
-    if not difference:
-        return "M/A"
-
-    if isinstance(difference, core.LocalOnlyResourceDifference) or isinstance(difference, core.ResourceAttributeDifferences):
-        return difference.get_resource_name()
-
-    return "(Missing)"
-
-
-def display_attribute_differences(difference):
-    if isinstance(difference, core.ResourceAttributeDifferences):
-        common_as_string = []
-        for resource_name, diff in difference.attribute_differences.items():
-            if diff[0] and not diff[1]:
-                common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> ???", width=FIXED_WIDTH))
-            elif not diff[0] and diff[1]:
-                common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: ??? <=> {diff[1]}", width=FIXED_WIDTH))
-            elif diff[0] and diff[1]:
-                common_as_string.append(textwrap.shorten(f"{bold(resource_name)}: {diff[0]} <=> {diff[1]}", width=FIXED_WIDTH))
-        return "\n".join(common_as_string)
-
-    return ""
-
-def display_change_in_remote_config(difference):
-    if not difference:
-        return "M/A"
-
-    if isinstance(difference, core.RemoteOnlyResourceDifference) or isinstance(difference, core.ResourceAttributeDifferences):
-        return difference.get_resource_name()
-
-    return "(Missing)"
 
 if __name__ == '__main__':
     try:
