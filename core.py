@@ -209,7 +209,7 @@ def __calculate_difference_between_resources(local_resources: list, remote_resou
         return diff_list
 
 
-def __compare_resource(local_resource, remote_resource):
+def __compare_resource(local_resource: dict, remote_resource: dict) -> dict:
     local_keys = local_resource.keys()
     remote_keys = remote_resource.keys()
 
