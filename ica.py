@@ -31,7 +31,8 @@ def show(cloud, subscription_id):
 
 @main.command()
 @click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
-def diff(file):
+@click.option("-o", "--output", type=click.Choice(['table', 'tree'], case_sensitive=True), default="table", show_default=True, help="Output format")
+def diff(file, output):
     """Shows differences between local and remote resources"""
 
     logging.debug(f"Calling 'diff' command, parameters:\"-f {file}\"")
@@ -42,7 +43,10 @@ def diff(file):
         else:
             click.echo("There are differences")
             click.echo("")
-            output_format.print_as_table(sys.stdout, differences, file, "Cloud")
+            if output == "table":
+                output_format.print_as_table(sys.stdout, differences, file, "Cloud")
+            else:
+                output_format.print_as_tree(sys.stdout, differences, file, "Cloud")
 
 @main.command()
 @click.option("-f", "--file", default=DEFAULT_FILENAME, show_default=True, help=CONFIG_FILE_HELP)
